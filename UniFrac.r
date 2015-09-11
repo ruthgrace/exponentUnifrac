@@ -4,6 +4,10 @@
 library(phangorn)
 library(ape)
 
+gm_mean = function(x, na.rm=TRUE){
+  exp(mean(log(x + 0.5), na.rm=na.rm) )
+}
+
 #valid methods are unweighted, weighted, information. Any other method will result in a warning and the unweighted analysis
 #pruneTree option prunes the tree for each comparison to exclude branch lengths not present in both samples
 #normalize divides the value at each node by sum of weights to guarantee output between 0 and 1 (breaks the triangle inequality)
@@ -33,18 +37,25 @@ getDistanceMatrix <- function(otuTable,tree,method="weighted",verbose=FALSE,prun
 	otu.prop <- as.matrix(otu.prop)
 	rownames(otu.prop) <- rownames(otuTable)
 	colnames(otu.prop) <- colnames(otuTable)
-
 	if(verbose) {	print("calculated proportional abundance")	}
+
+	# calculate geometric mean & geometric sum for exponent weighted UniFrac
+	geometric_mean <- apply(otuTable, 1, gm_mean)
+	geometric_sum <- apply(otuTable, 1, sum) / geometric_mean
+	if(verbose) {	print("calculated geometric mean per sample")	}
 
 	##get cumulative proportional abundance for the nodes (nodes are ordered same as in the phylo tree representation)
 
 	#cumulative proportional abundance stored in weights
-	#weights <- data.frame(matrix(0,ncol=(length(tree$edge.length) + 1),nrow=nrow(otuTable)))
 	weights <- matrix(NA,ncol=(length(tree$edge.length) + 1),nrow=nrow(otuTable))
+	#cumulative abundance
+	absolute_weights <- matrix(NA,ncol=(length(tree$edge.length) + 1),nrow=nrow(otuTable))
 	#each row is a sample
 	rownames(weights) <- rownames(otuTable)
+	rownames(absolute_weights) <- rownames(otuTable)
 	#each column is the abundance weighting for a node in the phylogenetic tree
 	colnames(weights) <- c(1:(length(tree$edge.length)+1))
+	colnames(absolute_weights) <- c(1:(length(tree$edge.length)+1))
 
 	treeLeaves <- c(1:length(tree$tip.label))
 
@@ -67,11 +78,13 @@ getDistanceMatrix <- function(otuTable,tree,method="weighted",verbose=FALSE,prun
 			otuName <- tree$tip.label[childNode]
 			otuIndex <- which(colnames(otu.prop) == otuName)[1]
 			weights[,childNode] <- otu.prop[,otuIndex]
+			absolute_weights[,childNode] <- otuTable[,otuIndex]
 		}
 
 		if (is.na(weights[1,parentNode])) {
 			# initialize parentNode with counts of zero
 			weights[,parentNode] <- 0
+			absolute_weights[,parentNode] <- 0
 		}
 
 
@@ -82,6 +95,7 @@ getDistanceMatrix <- function(otuTable,tree,method="weighted",verbose=FALSE,prun
 
 		#add child node abundance to parent node abundance
 		weights[,parentNode] <- weights[,parentNode] + weights[,childNode]
+		absolute_weights[,parentNode] <- absolute_weights[,parentNode] + absolute_weights[,childNode]
 		# print("new parent weights")
 		# print(str(weights[,parentNode]))
 		
@@ -94,6 +108,16 @@ getDistanceMatrix <- function(otuTable,tree,method="weighted",verbose=FALSE,prun
 		if(verbose) {	print("information entropy transform")	}
 		#information entropy transform
 		weights[] <- (-1) * weights[] * log2(weights[])
+		weights <- as.matrix(weights)
+		weights[which(is.na(weights))] <- 0
+	}
+
+	if (method=="exponent") {
+		if(verbose) {	print("CLR exponent transform")	}
+		weights[] <- (absolute_weights[] / geometric_mean)
+		if (normalize) {
+			weights[] <- weights[] / geometric_sum
+		}
 		weights <- as.matrix(weights)
 		weights[which(is.na(weights))] <- 0
 	}
@@ -114,14 +138,16 @@ getDistanceMatrix <- function(otuTable,tree,method="weighted",verbose=FALSE,prun
 	for (i in 1:nSamples) {
 		for (j in i:nSamples) {
 
-				if (method=="weighted" || method=="information") {
+				if (method=="weighted" || method=="information" || method=="exponent") {
 					# the formula is sum of (proportional branch lengths * | proportional abundance for sample A - proportional abundance for sample B| )
 					if (pruneTree==TRUE){
 						includeBranchLengths <- which( (weights[i,] > 0) | (weights[j,] > 0) )
-						distance <- sum( branchLengths[includeBranchLengths] * abs(weights[i,includeBranchLengths] - weights[j,includeBranchLengths]) )/sum( branchLengths[includeBranchLengths])
-						if (normalize==TRUE) {
+						if (normalize==TRUE && method!="exponent") {
 							distance <- sum( branchLengths[includeBranchLengths] * abs(weights[i,includeBranchLengths] - weights[j,includeBranchLengths]) )/sum( branchLengths[includeBranchLengths]* (weights[i,includeBranchLengths] + weights[j,includeBranchLengths]) )
-						}						
+						}
+						else {
+							distance <- sum( branchLengths[includeBranchLengths] * abs(weights[i,includeBranchLengths] - weights[j,includeBranchLengths]) )/sum( branchLengths[includeBranchLengths])
+						}
 					}
 					else {
 						distance <- sum( branchLengths * abs(weights[i,] - weights[j,]) )/sum(branchLengths)
