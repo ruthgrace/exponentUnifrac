@@ -45,7 +45,7 @@ write.table(information,file="output/information_distance_matrix.txt",sep="\t",q
 write.table(exponent,file="output/exponent_distance_matrix.txt",sep="\t",quote=FALSE)
 
 
-groups <- MyMetaOrdered$diagnosis
+groups <- MyMetaOrdered$n_status
 
 unweighted.pcoa <- pcoa(unweighted)
 weighted.pcoa <- pcoa(weighted)
