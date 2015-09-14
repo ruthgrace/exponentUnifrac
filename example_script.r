@@ -45,7 +45,40 @@ write.table(information,file="output/information_distance_matrix.txt",sep="\t",q
 write.table(exponent,file="output/exponent_distance_matrix.txt",sep="\t",quote=FALSE)
 
 
-groups <- MyMetaOrdered$n_status
+#conditions (bv - bacterial vaginosis as scored by nugent/amsel, i - intermediate, n - normal/healthy)
+groups <- MyMetaOrdered$n_status #levels bv, i, n
+originalgroups <- groups
+# change conditions so that samples which are more than 50% one taxa are colored by that taxa
+otuSum <- apply(otu.tab,1,sum)
+otuMax <- apply(otu.tab,1,max)
+otuWhichMax <- apply(otu.tab,1,which.max)
+otuDominated <- which(otuMax > otuSum/2)
+
+
+otuMaxTax <- taxonomy[otuWhichMax]
+#otuDominated <- c(otuDominated[which(as.numeric(otuMaxTax[otuDominated])==32)],otuDominated[which(as.numeric(otuMaxTax[otuDominated])==33)])
+
+taxonomyGroups <- as.character(groups)
+taxonomyGroups[otuDominated] <- as.character(otuMaxTax[otuDominated])
+
+taxonomyGroups <- as.factor(taxonomyGroups)
+
+groups <- taxonomyGroups
+
+# assign appropriate names to single taxa dominated groups
+newLevels <- levels(taxonomyGroups)
+splittaxa <- strsplit(levels(taxonomyGroups),split=";")
+
+for (i in 1:length(splittaxa)) {
+	if (length(splittaxa[[i]])>1) {
+		newLevels[i] <- paste(splittaxa[[i]][length(splittaxa[[i]])-1],splittaxa[[i]][length(splittaxa[[i]])])
+	}
+	else {
+		newLevels[i] <- splittaxa[[i]][1]
+	}
+}
+
+levels(taxonomyGroups) <- newLevels
 
 unweighted.pcoa <- pcoa(unweighted)
 weighted.pcoa <- pcoa(weighted)
@@ -80,6 +113,7 @@ pdf("output/pcoa_plots.pdf")
 #plot pcoa plots
 plot(unweighted.pcoa$vectors[,1],unweighted.pcoa$vectors[,2], col=groups,main="Unweighted UniFrac\nprincipal coordinates analysis",xlab=paste("First Component", round(unweighted.varEx[1],digits=3),"variance explained"),ylab=paste("Second Component", round(unweighted.varEx[2],digits=3),"variance explained"),pch=19,cex.lab=1.4,cex.main=2)
 plot(weighted.pcoa$vectors[,1],weighted.pcoa$vectors[,2], col=groups,main="Weighted UniFrac\nprincipal coordinates analysis",xlab=paste("First Component", round(weighted.varEx[1],digits=3),"variance explained"),ylab=paste("Second Component", round(weighted.varEx[2],digits=3),"variance explained"),pch=19,cex.lab=1.4,cex.main=2)
+legend(0.2,0.32,levels(taxonomyGroups),col=palette(),pch=19)
 plot(information.pcoa$vectors[,1],information.pcoa$vectors[,2], col=groups,main="Information UniFrac\nprincipal coordinates analysis",xlab=paste("First Component", round(information.varEx[1],digits=3),"variance explained"),ylab=paste("Second Component", round(information.varEx[2],digits=3),"variance explained"),pch=19,cex.lab=1.4,cex.main=2)
 plot(exponent.pcoa$vectors[,1],exponent.pcoa$vectors[,2], col=groups,main="Exponent UniFrac\nprincipal coordinates analysis",xlab=paste("First Component", round(exponent.varEx[1],digits=3),"variance explained"),ylab=paste("Second Component", round(exponent.varEx[2],digits=3),"variance explained"),pch=19,cex.lab=1.4,cex.main=2)
 

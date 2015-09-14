@@ -67,13 +67,8 @@ getDistanceMatrix <- function(otuTable,tree,method="weighted",verbose=FALSE,prun
 		parentNode <- tree$edge[i,1]
 		childNode <- tree$edge[i,2]
 
-		# if (childNode %in% treeLeaves) {
-		# 	otuName <- tree$tip.label[childNode]
-		# 	otuIndex <- which(colnames(otu.prop) == otuName)[1]
-		# 	weights[,childNode] <- otu.prop[,otuIndex]
-		# }
-
-		if (is.na(weights[1,childNode])) { #if node is all NA, node has not been seen before, and node is a leaf (ie. an OTU)
+		#if node is all NA, node has not been seen before, and node is a leaf (ie. an OTU)
+		if (is.na(weights[1,childNode])) {
 			#put OTU abundance in weights
 			otuName <- tree$tip.label[childNode]
 			otuIndex <- which(colnames(otu.prop) == otuName)[1]
@@ -87,18 +82,9 @@ getDistanceMatrix <- function(otuTable,tree,method="weighted",verbose=FALSE,prun
 			absolute_weights[,parentNode] <- 0
 		}
 
-
-		# print("new child weights")
-		# print(str(weights[,childNode]))
-		# print("old parent weights")
-		# print(str(weights[,parentNode]))
-
 		#add child node abundance to parent node abundance
 		weights[,parentNode] <- weights[,parentNode] + weights[,childNode]
 		absolute_weights[,parentNode] <- absolute_weights[,parentNode] + absolute_weights[,childNode]
-		# print("new parent weights")
-		# print(str(weights[,parentNode]))
-		
 	}
 
 
@@ -114,9 +100,11 @@ getDistanceMatrix <- function(otuTable,tree,method="weighted",verbose=FALSE,prun
 
 	if (method=="exponent") {
 		if(verbose) {	print("CLR exponent transform")	}
-		weights[] <- (absolute_weights[] / geometric_mean)
 		if (normalize) {
-			weights[] <- weights[] / geometric_sum
+			weights[] <- (absolute_weights[] / geometric_means[])
+		}
+		else {
+			weights[] <- (absolute_weights[] / geometric_mean)
 		}
 		weights <- as.matrix(weights)
 		weights[which(is.na(weights))] <- 0
