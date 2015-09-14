@@ -3,9 +3,10 @@
 
 library(phangorn)
 library(ape)
+library(zCompositions)
 
 gm_mean = function(x, na.rm=TRUE){
-  exp(mean(log(x + 0.5), na.rm=na.rm) )
+  exp(mean(log(x), na.rm=na.rm) )
 }
 
 #valid methods are unweighted, weighted, information. Any other method will result in a warning and the unweighted analysis
@@ -39,6 +40,8 @@ getDistanceMatrix <- function(otuTable,tree,method="weighted",verbose=FALSE,prun
 	colnames(otu.prop) <- colnames(otuTable)
 	if(verbose) {	print("calculated proportional abundance")	}
 
+	# add priors to zeros based on bayesian approach
+	otuTable <- cmultRepl(otuTable, method="CZM", output="counts")
 	# calculate geometric mean & geometric sum for exponent weighted UniFrac
 	geometric_mean <- apply(otuTable, 1, gm_mean)
 	geometric_sum <- apply(otuTable, 1, sum) / geometric_mean
