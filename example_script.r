@@ -6,6 +6,7 @@ options(error=recover)
 source("UniFrac.r")
 library(ape)
 library(phangorn)
+library(vegan)
 
 otu.tab <- read.table("data/td_OTU_tag_mapped_lineage.txt", header=T, sep="\t", row.names=1, comment.char="", check.names=FALSE)
 
@@ -32,8 +33,11 @@ otu_indicies <- otu_indicies[!is.na(otu_indicies)]
 otu.tab <- otu.tab[otu_indicies,]
 MyMetaOrdered <- MyMeta[match(rownames(otu.tab),rownames(MyMeta)),]
 
+#rarefy data for unweighted unifrac
+otu.tab.rarefy <- rrarefy(otu.tab, min(apply(otu.tab,1,sum)))
+
 #calculate distance matrix
-unweighted <- getDistanceMatrix(otu.tab,tree,method="unweighted",verbose=TRUE)
+unweighted <- getDistanceMatrix(otu.tab.rarefy,tree,method="unweighted",verbose=TRUE)
 weighted <- getDistanceMatrix(otu.tab,tree,method="weighted",verbose=TRUE)
 information <- getDistanceMatrix(otu.tab,tree,method="information",verbose=TRUE)
 exponent <- getDistanceMatrix(otu.tab,tree,method="exponent",verbose=TRUE)
@@ -104,8 +108,6 @@ unweighted.vector <- unlist(unweighted[lower.tri(unweighted,diag=TRUE)])
 weighted.vector <- unlist(weighted[lower.tri(weighted,diag=TRUE)])
 information.vector <- unlist(information[lower.tri(information,diag=TRUE)])
 exponent.vector <- unlist(exponent[lower.tri(exponent,diag=TRUE)])
-
-
 
 pdf("output/pcoa_plots.pdf")
 

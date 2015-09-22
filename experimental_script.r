@@ -6,6 +6,7 @@ options(error=recover)
 source("UniFrac.r")
 library(ape)
 library(phangorn)
+library(vegan)
 
 
 # read OTU table and format appropriately for input into UniFrac methods
@@ -37,8 +38,11 @@ otu_indicies <- otu_indicies[!is.na(otu_indicies)]
 breastmilk.otu.tab <- breastmilk.otu.tab[otu_indicies,]
 MyMetaOrdered <- MyMeta[match(rownames(breastmilk.otu.tab),rownames(MyMeta)),]
 
+#rarefy data for unweighted unifrac
+breastmilk.otu.tab.rarefy <- rrarefy(breastmilk.otu.tab, min(apply(otu.tab,1,sum)))
+
 #calculate distance matrix
-unweighted <- getDistanceMatrix(breastmilk.otu.tab,breastmilk.tree,method="unweighted",verbose=TRUE)
+unweighted <- getDistanceMatrix(breastmilk.otu.tab.rarefy,breastmilk.tree,method="unweighted",verbose=TRUE)
 weighted <- getDistanceMatrix(breastmilk.otu.tab,breastmilk.tree,method="weighted",verbose=TRUE)
 information <- getDistanceMatrix(breastmilk.otu.tab,breastmilk.tree,method="information",verbose=TRUE)
 exponent.normalize <- getDistanceMatrix(breastmilk.otu.tab,breastmilk.tree,method="exponent",verbose=TRUE,normalize=TRUE)
