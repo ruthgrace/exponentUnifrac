@@ -41,14 +41,12 @@ MyMetaOrdered <- MyMeta[match(rownames(breastmilk.otu.tab),rownames(MyMeta)),]
 unweighted <- getDistanceMatrix(breastmilk.otu.tab,breastmilk.tree,method="unweighted",verbose=TRUE)
 weighted <- getDistanceMatrix(breastmilk.otu.tab,breastmilk.tree,method="weighted",verbose=TRUE)
 information <- getDistanceMatrix(breastmilk.otu.tab,breastmilk.tree,method="information",verbose=TRUE)
-exponent <- getDistanceMatrix(breastmilk.otu.tab,breastmilk.tree,method="exponent",verbose=TRUE,normalize=FALSE)
 exponent.normalize <- getDistanceMatrix(breastmilk.otu.tab,breastmilk.tree,method="exponent",verbose=TRUE,normalize=TRUE)
 
 #output distance matrices
 write.table(unweighted,file="experimental_output/unweighted_distance_matrix.txt",sep="\t",quote=FALSE)
 write.table(weighted,file="experimental_output/weighted_distance_matrix.txt",sep="\t",quote=FALSE)
 write.table(information,file="experimental_output/information_distance_matrix.txt",sep="\t",quote=FALSE)
-write.table(exponent,file="experimental_output/exponent_distance_matrix.txt",sep="\t",quote=FALSE)
 write.table(exponent.normalize,file="experimental_output/exponent_normalize_distance_matrix.txt",sep="\t",quote=FALSE)
 
 #conditions (bv - bacterial vaginosis as scored by nugent/amsel, i - intermediate, n - normal/healthy)
@@ -90,7 +88,6 @@ levels(taxonomyGroups) <- newLevels
 unweighted.pcoa <- pcoa(unweighted)
 weighted.pcoa <- pcoa(weighted)
 information.pcoa <- pcoa(information)
-exponent.pcoa <- pcoa(exponent)
 exponent.normalize.pcoa <- pcoa(exponent.normalize)
 
 
@@ -106,14 +103,12 @@ getVarExplained <- function(vector) {
 unweighted.varEx <- getVarExplained(unweighted.pcoa$vectors)
 weighted.varEx <- getVarExplained(weighted.pcoa$vectors)
 information.varEx <- getVarExplained(information.pcoa$vectors)
-exponent.varEx <- getVarExplained(exponent.pcoa$vectors)
 exponent.normalize.varEx <- getVarExplained(exponent.normalize.pcoa$vectors)
 
 #get vector version of distance matrices for correlation plots below
 unweighted.vector <- unlist(unweighted[lower.tri(unweighted,diag=TRUE)])
 weighted.vector <- unlist(weighted[lower.tri(weighted,diag=TRUE)])
 information.vector <- unlist(information[lower.tri(information,diag=TRUE)])
-exponent.vector <- unlist(exponent[lower.tri(exponent,diag=TRUE)])
 exponent.normalize.vector <- unlist(exponent.normalize[lower.tri(exponent.normalize,diag=TRUE)])
 
 
@@ -125,16 +120,14 @@ plot(unweighted.pcoa$vectors[,1],unweighted.pcoa$vectors[,2], col=groups,main="U
 plot(weighted.pcoa$vectors[,1],weighted.pcoa$vectors[,2], col=groups,main="Weighted UniFrac\nprincipal coordinates analysis",xlab=paste("First Component", round(weighted.varEx[1],digits=3),"variance explained"),ylab=paste("Second Component", round(weighted.varEx[2],digits=3),"variance explained"),pch=19,cex.lab=1.4,cex.main=2)
 legend(0.1,0.17,levels(taxonomyGroups),col=palette(),pch=19)
 plot(information.pcoa$vectors[,1],information.pcoa$vectors[,2], col=groups,main="Information UniFrac\nprincipal coordinates analysis",xlab=paste("First Component", round(information.varEx[1],digits=3),"variance explained"),ylab=paste("Second Component", round(information.varEx[2],digits=3),"variance explained"),pch=19,cex.lab=1.4,cex.main=2)
-plot(exponent.pcoa$vectors[,1],exponent.pcoa$vectors[,2], col=groups,main="Exponent UniFrac\nprincipal coordinates analysis",xlab=paste("First Component", round(exponent.varEx[1],digits=3),"variance explained"),ylab=paste("Second Component", round(exponent.varEx[2],digits=3),"variance explained"),pch=19,cex.lab=1.4,cex.main=2)
 plot(exponent.normalize.pcoa$vectors[,1],exponent.normalize.pcoa$vectors[,2], col=groups,main="Exponent Normalized UniFrac\nprincipal coordinates analysis",xlab=paste("First Component", round(exponent.normalize.varEx[1],digits=3),"variance explained"),ylab=paste("Second Component", round(exponent.normalize.varEx[2],digits=3),"variance explained"),pch=19,cex.lab=1.4,cex.main=2)
 
 #plot correlation between different UniFrac modes
 plot(unweighted.vector,information.vector,main="unweighted vs. information UniFrac")
 plot(weighted.vector,information.vector,main="weighted vs. information UniFrac")
 plot(unweighted.vector,weighted.vector,main="unweighted vs. weighted UniFrac")
-plot(unweighted.vector,exponent.vector,main="unweighted vs. exponent UniFrac")
-plot(weighted.vector,exponent.vector,main="weighted vs. exponent UniFrac")
-plot(information.vector,exponent.vector,main="information vs. exponent UniFrac")
-plot(exponent.normalize.vector,exponent.vector,main="normalized exponent vs. exponent UniFrac")
+plot(unweighted.vector,exponent.normalize.vector,main="unweighted vs. exponent UniFrac")
+plot(weighted.vector,exponent.normalize.vector,main="weighted vs. exponent UniFrac")
+plot(information.vector,exponent.normalize.vector,main="information vs. exponent UniFrac")
 
 dev.off()
