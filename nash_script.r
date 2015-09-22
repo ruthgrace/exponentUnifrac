@@ -49,11 +49,11 @@ write.table(information,file="nash_output/information_distance_matrix.txt",sep="
 write.table(exponent,file="nash_output/exponent_normalize_distance_matrix.txt",sep="\t",quote=FALSE)
 
 #conditions (bv - bacterial vaginosis as scored by nugent/amsel, i - intermediate, n - normal/healthy)
-groups <- MyMetaOrdered$SSvsNASH #levels bv, i, n
+groups <- MyMetaOrdered$SSvsNASH
 originalgroups <- groups
 
 # healthy is represented by 0, SS/NASH is represented by 1
-groups[which(!is.na(MyMetaOrdered$SSvsNASH))] <- 1
+groups <- groups + 1;
 groups[which(is.na(MyMetaOrdered$SSvsNASH))] <- 0
 
 # change conditions so that samples which are more than 50% one taxa are colored by that taxa
@@ -121,7 +121,7 @@ pdf("nash_output/pcoa_plots.pdf")
 #plot pcoa plots
 plot(unweighted.pcoa$vectors[,1],unweighted.pcoa$vectors[,2], col=groups,main="Unweighted UniFrac\nprincipal coordinates analysis",xlab=paste("First Component", round(unweighted.varEx[1],digits=3),"variance explained"),ylab=paste("Second Component", round(unweighted.varEx[2],digits=3),"variance explained"),pch=19,cex.lab=1.4,cex.main=2)
 plot(weighted.pcoa$vectors[,1],weighted.pcoa$vectors[,2], col=groups,main="Weighted UniFrac\nprincipal coordinates analysis",xlab=paste("First Component", round(weighted.varEx[1],digits=3),"variance explained"),ylab=paste("Second Component", round(weighted.varEx[2],digits=3),"variance explained"),pch=19,cex.lab=1.4,cex.main=2)
-legend(0.2,0.32,levels(taxonomyGroups),col=palette(),pch=19)
+legend(-0.37,-0.05,c("Healthy","SS","NASH"),col=palette(),pch=19)
 plot(information.pcoa$vectors[,1],information.pcoa$vectors[,2], col=groups,main="Information UniFrac\nprincipal coordinates analysis",xlab=paste("First Component", round(information.varEx[1],digits=3),"variance explained"),ylab=paste("Second Component", round(information.varEx[2],digits=3),"variance explained"),pch=19,cex.lab=1.4,cex.main=2)
 plot(exponent.pcoa$vectors[,1],exponent.pcoa$vectors[,2], col=groups,main="Exponent Normalized UniFrac\nprincipal coordinates analysis",xlab=paste("First Component", round(exponent.varEx[1],digits=3),"variance explained"),ylab=paste("Second Component", round(exponent.varEx[2],digits=3),"variance explained"),pch=19,cex.lab=1.4,cex.main=2)
 
