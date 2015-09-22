@@ -136,7 +136,7 @@ getDistanceMatrix <- function(otuTable,tree,method="weighted",verbose=FALSE,prun
     weight.vector <- unlist(weights)
     exponent.vector <- unlist((absolute_weights[] / geometric_means[]))
     pdf("exponent_vs_proportional_weights.pdf")
-    plot(weight.vector, exponent.vector, main = "Exponent vs. Proportion UniFrac Weights", xlab="Proportions", ylab="Exponent UniFrac weights")
+    plot(weight.vector, exponent.vector, main = "Exponent vs. Proportion UniFrac Weights", xlab="Proportions", ylab="Exponent UniFrac weights",pch=19,col=rgb(0.5,0,0.5,0.1))
     dev.off()
 		if(verbose) {	print("CLR exponent transform")	}
 		weights[] <- (absolute_weights[] / geometric_means[])
