@@ -133,12 +133,7 @@ getDistanceMatrix <- function(otuTable,tree,method="weighted",verbose=FALSE,prun
 
 	if (method=="exponent") {
 		if(verbose) {	print("CLR exponent transform")	}
-		if (normalize) {
-			weights[] <- (absolute_weights[] / geometric_means[])
-		}
-		else {
-			weights[] <- (absolute_weights[] / geometric_mean)
-		}
+		weights[] <- (absolute_weights[] / geometric_means[])
 		weights <- as.matrix(weights)
 		weights[which(is.na(weights))] <- 0
 	}
