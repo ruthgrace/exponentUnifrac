@@ -2,6 +2,7 @@
 options(error=recover)
 
 #this script prints out PDF pcoa plots and distance matrices, given an OTU table, phylogenetic tree, and metadata
+# run in bash like: nohup Rscript gut_saliva_script.r > gut_saliva_script_nohup.out 2>&1&
 
 source("UniFrac.r")
 library(ape)
