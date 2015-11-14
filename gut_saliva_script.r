@@ -12,7 +12,7 @@ library(vegan)
 plot_all_gut_saliva_unifrac <- function(count_file, tree_file, output_file) {
 
 	otu.tab <- read.table(count_file, header=T, sep="\t", row.names=1, comment.char="", check.names=FALSE)
-
+	otu.tab <- data.matrix(otu.tab)
 	# read and root tree (rooted tree is required)
 	tree <- read.tree(tree_file)
 	tree <- midpoint(tree)
