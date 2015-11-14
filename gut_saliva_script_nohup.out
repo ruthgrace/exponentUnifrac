@@ -1,0 +1,18 @@
+Loading required package: ape
+Error in library(zCompositions) : 
+  there is no package called ‘zCompositions’
+Calls: source -> withVisible -> eval -> eval -> library
+recover called non-interactively; frames dumped, use debugger() to view
+Loading required package: permute
+Loading required package: lattice
+This is vegan 2.3-0
+
+Attaching package: ‘vegan’
+
+The following objects are masked from ‘package:phangorn’:
+
+    diversity, treedist
+
+Error in plot_all_gut_saliva_unifrac("data/gut_saliva_data/low_sequencing_depth_hmp_data.txt",  : 
+  could not find function "getDistanceMatrix"
+recover called non-interactively; frames dumped, use debugger() to view
