@@ -24,7 +24,7 @@ plot_all_gut_saliva_unifrac <- function(count_file, tree_file, output_file) {
 	
 	#rarefy data for unweighted unifrac
 	otu.tab.rarefy <- rrarefy(otu.tab, min(apply(otu.tab,1,sum)))
-
+	otu.tab.rarefy <- data.matrix(otu.tab.rarefy)
 	#calculate distance matrix
 	unweighted <- getDistanceMatrix(otu.tab.rarefy,tree,method="unweighted",verbose=TRUE)
 	#output distance matrices
