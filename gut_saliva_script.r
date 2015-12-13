@@ -8,6 +8,13 @@ source("UniFrac.r")
 library(ape)
 library(phangorn)
 library(vegan)
+#function to get variance explained for the PCOA component labels
+getVarExplained <- function(vector) {
+	rawVarEx <- apply(vector,2,function(x) sd(x)*sd(x))
+	totalVarExplained <- sum(rawVarEx)
+	varEx <- rawVarEx/totalVarExplained
+	return(varEx)
+}
 
 plot_all_gut_saliva_unifrac <- function(count_file, tree_file, output_file) {
 
@@ -80,16 +87,6 @@ plot_all_gut_saliva_unifrac <- function(count_file, tree_file, output_file) {
 	weighted.pcoa <- pcoa(weighted)
 	information.pcoa <- pcoa(information)
 	exponent.pcoa <- pcoa(exponent)
-
-
-	#function to get variance explained for the PCOA component labels
-	getVarExplained <- function(vector) {
-		rawVarEx <- apply(vector,2,function(x) sd(x)*sd(x))
-		totalVarExplained <- sum(rawVarEx)
-		varEx <- rawVarEx/totalVarExplained
-		return(varEx)
-	}
-
 
 	unweighted.varEx <- getVarExplained(unweighted.pcoa$vectors)
 	weighted.varEx <- getVarExplained(weighted.pcoa$vectors)
