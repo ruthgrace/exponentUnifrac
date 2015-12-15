@@ -10,7 +10,7 @@ library(vegan)
 # get default par
 plotParameters <- par()
 
-source("Unifrac.R")
+source("UniFrac_memory_efficient.r")
 
 # read OTU table and format appropriately for input into UniFrac methods
 breastmilk.otu.tab <- read.table("./data/camilla_data/td_OTU_tag_mapped_lineage.txt", header=T, sep="\t", row.names=1, comment.char="", check.names=FALSE)
