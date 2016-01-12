@@ -6,10 +6,12 @@ library(ape)
 library(zCompositions)
 
 # global variables - used to save memory when being passed between functions
-otuPropsPerNode <- "global"
-weightsPerNode <- "global"
-unifrac.tree <- "global"
-unifrac.method <- "global"
+# otuPropsPerNode <- "global"
+# otuPropsPerNode.adjustedZeros <- "global"
+# weightsPerNode <- "global"
+# unifrac.tree <- "global"
+# unifrac.method <- "global"
+# unifrac.treeLeaves <- "global"
 
 gm_mean = function(x, na.rm=TRUE){
   exp(mean(log(x), na.rm=na.rm) )
@@ -30,8 +32,8 @@ gm_mean = function(x, na.rm=TRUE){
 #   return(gm_vec)
 # }
 
-gm_from_props = function(row, root) {
-  return(log2(otuPropsPerNode[,root]/gm_mean(row[which(row>0)])))
+gm_from_props = function(rownum, root) {
+  return(log2(otuPropsPerNode.adjustedZeros[rownum,root]) - mean(log2(otuPropsPerNode.adjustedZeros[rownum,which(otuPropsPerNode.adjustedZeros[rownum,]>0)])))
 }
 
 build_weights = function(root) {
@@ -45,8 +47,12 @@ build_weights = function(root) {
     
     # deconstruct in copy (make all leaves positive and everything else negative for counts, make sure that all the numbers that exist are for the subtree that you just calculated)
     childProportions <- otuPropsPerNode
-    otuPropsPerNode[,which(colnames(otuPropsPerNode) %in% tree$tip.label)] <<- abs(otuPropsPerNode[,which(colnames(otuPropsPerNode) %in% tree$tip.label)])
-    otuPropsPerNode[,which(!(colnames(otuPropsPerNode) %in% tree$tip.label))] <<- (-1)*abs(otuPropsPerNode[,which(!(colnames(otuPropsPerNode) %in% tree$tip.label))])
+        
+    otuPropsPerNode[,which(colnames(otuPropsPerNode) %in% unifrac.treeLeaves)] <- abs(otuPropsPerNode[,which(colnames(otuPropsPerNode) %in% unifrac.treeLeaves)])
+    otuPropsPerNode[,which(!(colnames(otuPropsPerNode) %in% unifrac.treeLeaves))] <- (-1)*abs(otuPropsPerNode[,which(!(colnames(otuPropsPerNode) %in% unifrac.treeLeaves))])
+    
+    otuPropsPerNode.adjustedZeros[,which(colnames(otuPropsPerNode.adjustedZeros) %in% unifrac.treeLeaves)] <- abs(otuPropsPerNode.adjustedZeros[,which(colnames(otuPropsPerNode.adjustedZeros) %in% unifrac.treeLeaves)])
+    otuPropsPerNode.adjustedZeros[,which(!(colnames(otuPropsPerNode.adjustedZeros) %in% unifrac.treeLeaves))] <- (-1)*abs(otuPropsPerNode.adjustedZeros[,which(!(colnames(otuPropsPerNode.adjustedZeros) %in% unifrac.treeLeaves))])
     
     # construct values for right child
     build_weights(children[2])
@@ -55,20 +61,30 @@ build_weights = function(root) {
     
     # non leaf nodes keep positive
     # leaf nodes keep negative
-    otuPropsPerNode[,which(colnames(childProportions) %in% tree$tip.label & childProportions[1,] < 0)] <<- (-1)*abs(otuPropsPerNode[,which(colnames(childProportions) %in% tree$tip.label & childProportions[1,] < 0)])
-    otuPropsPerNode[,which(!(colnames(childProportions) %in% tree$tip.label) & childProportions[1,] > 0)] <<- abs(otuPropsPerNode[,which(!(colnames(childProportions) %in% tree$tip.label) & childProportions[1,] > 0)])
+    otuPropsPerNode[,which(colnames(childProportions) %in% unifrac.treeLeaves & childProportions[1,] < 0)] <- (-1)*abs(otuPropsPerNode[,which(colnames(childProportions) %in% unifrac.treeLeaves & childProportions[1,] < 0)])
+    otuPropsPerNode[,which(!(colnames(childProportions) %in% unifrac.treeLeaves) & childProportions[1,] > 0)] <- abs(otuPropsPerNode[,which(!(colnames(childProportions) %in% unifrac.treeLeaves) & childProportions[1,] > 0)])
+    
+    otuPropsPerNode.adjustedZeros[,which(colnames(childProportions) %in% unifrac.treeLeaves & childProportions[1,] < 0)] <- (-1)*abs(otuPropsPerNode.adjustedZeros[,which(colnames(childProportions) %in% unifrac.treeLeaves & childProportions[1,] < 0)])
+    otuPropsPerNode.adjustedZeros[,which(!(colnames(childProportions) %in% unifrac.treeLeaves) & childProportions[1,] > 0)] <- abs(otuPropsPerNode.adjustedZeros[,which(!(colnames(childProportions) %in% unifrac.treeLeaves) & childProportions[1,] > 0)])
     
     #calculate proportion and weight of current node
     otuPropsPerNode[,root] <- otuPropsPerNode[,children[1]] + otuPropsPerNode[,children[2]]
-    otuPropsPerNode[,children[1]] <<- (-1)*abs(otuPropsPerNode[,children[1]])
-    otuPropsPerNode[,children[2]] <<- (-1)*abs(otuPropsPerNode[,children[2]])
-    weightsPerNode[,root] <<- apply(otuPropsPerNode,1,function(x) { gm_from_props(x, root) })
+    otuPropsPerNode[,children[1]] <- (-1)*abs(otuPropsPerNode[,children[1]])
+    otuPropsPerNode[,children[2]] <- (-1)*abs(otuPropsPerNode[,children[2]])
+    
+    otuPropsPerNode.adjustedZeros[,root] <- otuPropsPerNode.adjustedZeros[,children[1]] + otuPropsPerNode.adjustedZeros[,children[2]]
+    otuPropsPerNode.adjustedZeros[,children[1]] <- (-1)*abs(otuPropsPerNode.adjustedZeros[,children[1]])
+    otuPropsPerNode.adjustedZeros[,children[2]] <- (-1)*abs(otuPropsPerNode.adjustedZeros[,children[2]])
+
+    # TODO fix - the new weightsPerNode is all negative, and the CLR values aren't zeros
+    
+    weightsPerNode[,root] <- sapply(c(1:nrow(otuPropsPerNode.adjustedZeros)),function(x) { gm_from_props(x, root) })
   }
 }
 
 
 #valid methods are unweighted, weighted, information. Any other method will result in a warning and the unweighted analysis
-#pruneTree option prunes the tree for each comparison to exclude branch lengths not present in both samples
+#pruneTree option prunes the tree for each comparison to exclude branch lenxgths not present in both samples
 #normalize divides the value at each node by sum of weights to guarantee output between 0 and 1 (breaks the triangle inequality)
 
 #otuTable must have samples as rows, OTUs as columns
@@ -95,6 +111,9 @@ getDistanceMatrix <- function(otuTable,tree,method="weighted",verbose=FALSE,prun
   
   #make globally available copy of method
   unifrac.method <<- method
+  
+  #make globally available copy of leaves
+  unifrac.treeLeaves <<- c(1:length(tree$tip.label))
 
 	# get proportions
 	readsPerSample <- apply(otuTable,1,sum)
@@ -106,6 +125,12 @@ getDistanceMatrix <- function(otuTable,tree,method="weighted",verbose=FALSE,prun
 
 	# add priors to zeros based on bayesian approach
 	otuTable.adjustedZeros <- cmultRepl(otuTable, method="CZM", output="counts")
+  readsPerSample <- apply(otuTable.adjustedZeros,1,sum)
+  otu.prop.adjustedZeros <- otuTable.adjustedZeros/readsPerSample
+  otu.prop.adjustedZeros <- as.matrix(otu.prop.adjustedZeros)
+	rownames(otu.prop.adjustedZeros) <- rownames(otuTable)
+	colnames(otu.prop.adjustedZeros) <- colnames(otuTable)
+  
 	# calculate geometric mean & geometric sum for exponent weighted UniFrac
 	geometric_mean <- apply(otuTable.adjustedZeros, 1, gm_mean)
 	geometric_sum <- apply(otuTable.adjustedZeros, 1, sum) / geometric_mean
@@ -114,26 +139,32 @@ getDistanceMatrix <- function(otuTable,tree,method="weighted",verbose=FALSE,prun
 	##get cumulative proportional abundance for the nodes (nodes are ordered same as in the phylo tree representation)
 
   otuPropsPerNode <<- matrix(NA, ncol=length(tree$edge.length)+1, nrow=length(rownames(otuTable)))
+  otuPropsPerNode.adjustedZeros <<- matrix(NA, ncol=length(tree$edge.length)+1, nrow=length(rownames(otuTable)))
   weightsPerNode <<- matrix(NA, ncol=length(tree$edge.length)+1, nrow=length(rownames(otuTable)))
   
 	#each row is a sample
   rownames(otuPropsPerNode) <- rownames(otuTable)
+  rownames(otuPropsPerNode.adjustedZeros) <- rownames(otuTable)
   rownames(weightsPerNode) <- rownames(otuTable)
   #each column is a node in the tree
   colnames(otuPropsPerNode) <- c(1:(length(tree$edge.length)+1))
+  colnames(otuPropsPerNode.adjustedZeros) <- c(1:(length(tree$edge.length)+1))
   colnames(weightsPerNode) <- c(1:(length(tree$edge.length)+1))
   
   leafNodes <- c(1:length(tree$tip.label))
-	leafEdges <- which(tree$edge[,2] %in% leafNodes)
-  leafEdgeLabels <- tree$tip.label[tree$edge[leafEdges,2]]
+  leafOrder <- match(tree$tip.label,rownames(otu.prop))
   
-  otuPropsPerNode[,leafEdges] <- otu.prop[,match(leafEdgeLabels,colnames(otu.prop))]
-  weightsPerNode[,leafEdges] <- otu.prop[,match(leafEdgeLabels,colnames(otu.prop))] / geometric_mean
+  otuPropsPerNode[,leafNodes] <- otu.prop[,leafOrder]
+  otuPropsPerNode.adjustedZeros[,leafNodes] <- otu.prop.adjustedZeros[,leafOrder]
+  weightsPerNode[,leafNodes] <- log2(otu.prop.adjustedZeros[,leafOrder])
+  weightsPerNode[,leafNodes] <- t(apply(weightsPerNode[,leafNodes],1,function(x) { return(x - mean(x))}))
   
   # the tree is in postorder, so the last edges belong to the root
   root <- tree$edge[nrow(tree$edge),1]
 
   if(verbose) {	print("calculating weights...")	}
+  
+  #TODO function doesn't do upper nodes :(
   
   build_weights(root)
 
@@ -141,19 +172,17 @@ getDistanceMatrix <- function(otuTable,tree,method="weighted",verbose=FALSE,prun
   
   nSamples <- nrow(otuTable)
   distanceMatrix <- matrix(NA,nrow=nSamples,ncol=nSamples)
-  rownames(distanceMatrix) <- rowname(otuTable)
-  colnames(distanceMatrix) <- rowname(otuTable)
+  rownames(distanceMatrix) <- rownames(otuTable)
+  colnames(distanceMatrix) <- rownames(otuTable)
   
   branchLengths <- tree$edge.length
   
   #convert table according to weight
   if (method=="information") {
     weights <- otuPropsPerNode*log2(otuPropsPerNode)
-  }
-  else if (method=="exponent") {
+  } else if (method=="exponent") {
     weights <- weightsPerNode
-  }
-  else {
+  } else {
     weights <- otuPropsPerNode
   }
   
