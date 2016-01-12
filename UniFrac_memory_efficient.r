@@ -138,14 +138,14 @@ getDistanceMatrix <- function(otuTable,tree,method="weighted",verbose=FALSE,prun
 
 	##get cumulative proportional abundance for the nodes (nodes are ordered same as in the phylo tree representation)
 
-  otuPropsPerNode <<- matrix(NA, ncol=length(tree$edge.length)+1, nrow=length(rownames(otuTable)))
-  otuPropsPerNode.adjustedZeros <<- matrix(NA, ncol=length(tree$edge.length)+1, nrow=length(rownames(otuTable)))
-  weightsPerNode <<- matrix(NA, ncol=length(tree$edge.length)+1, nrow=length(rownames(otuTable)))
+  otuPropsPerNode <<- matrix(NA, ncol=length(tree$edge.length)+1, nrow=length(colnames(otuTable)))
+  otuPropsPerNode.adjustedZeros <<- matrix(NA, ncol=length(tree$edge.length)+1, nrow=length(colnames(otuTable)))
+  weightsPerNode <<- matrix(NA, ncol=length(tree$edge.length)+1, nrow=length(colnames(otuTable)))
   
 	#each row is a sample
-  rownames(otuPropsPerNode) <- rownames(otuTable)
-  rownames(otuPropsPerNode.adjustedZeros) <- rownames(otuTable)
-  rownames(weightsPerNode) <- rownames(otuTable)
+  rownames(otuPropsPerNode) <- colnames(otuTable)
+  rownames(otuPropsPerNode.adjustedZeros) <- colnames(otuTable)
+  rownames(weightsPerNode) <- colnames(otuTable)
   #each column is a node in the tree
   colnames(otuPropsPerNode) <- c(1:(length(tree$edge.length)+1))
   colnames(otuPropsPerNode.adjustedZeros) <- c(1:(length(tree$edge.length)+1))
@@ -154,9 +154,9 @@ getDistanceMatrix <- function(otuTable,tree,method="weighted",verbose=FALSE,prun
   leafNodes <- c(1:length(tree$tip.label))
   leafOrder <- match(tree$tip.label,rownames(otu.prop))
   
-  otuPropsPerNode[,leafNodes] <- otu.prop[,leafOrder]
-  otuPropsPerNode.adjustedZeros[,leafNodes] <- otu.prop.adjustedZeros[,leafOrder]
-  weightsPerNode[,leafNodes] <- log2(otu.prop.adjustedZeros[,leafOrder])
+  otuPropsPerNode[,leafNodes] <- t(otu.prop[leafOrder,])
+  otuPropsPerNode.adjustedZeros[,leafNodes] <- t(otu.prop.adjustedZeros[leafOrder,])
+  weightsPerNode[,leafNodes] <- log2(t(otu.prop.adjustedZeros[leafOrder,]))
   weightsPerNode[,leafNodes] <- t(apply(weightsPerNode[,leafNodes],1,function(x) { return(x - mean(x))}))
   
   # the tree is in postorder, so the last edges belong to the root
