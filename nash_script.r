@@ -31,12 +31,12 @@ rownames(metadata) <- gsub("a$","",rownames(metadata))
 otu.tab.rarefy <- rrarefy(otu.tab, min(apply(otu.tab,1,sum)))
 
 ## input parameters for unweighted unifrac
-# otuTable <- otu.tab.rarefy
-# tree.original <- tree
-# method="unweighted"
-# verbose=TRUE
-# pruneTree=FALSE
-# normalize=TRUE
+otuTable <- otu.tab.rarefy
+tree.original <- tree
+method="unweighted"
+verbose=TRUE
+pruneTree=FALSE
+normalize=TRUE
 
 #calculate distance matrix
 unweighted <- getDistanceMatrix(otu.tab.rarefy,tree,method="unweighted",verbose=TRUE)

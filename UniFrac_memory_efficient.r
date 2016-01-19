@@ -38,35 +38,29 @@ gm_from_props = function(rownum, root) {
 
 build_weights = function(root) {
   print(paste("building weights for node ",root))
-  # if root is leaf, then calculate weight as normal
+  # make all weight values positive
+  otuPropsPerNode <- abs(otuPropsPerNode)
+  otuPropsPerNode.adjustedZeros <- abs(otuPropsPerNode.adjustedZeros)
+  # if root is leaf, then weight has already been calculated and we can skip this
   if (root > length(unifrac.tree$tip.label)) {
     children <- unifrac.tree$edge[which(unifrac.tree$edge[,1]==root),2]
     
     # construct values for one child
     build_weights(children[1])
     
-    # deconstruct in copy (make all leaves positive and everything else negative for counts, make sure that all the numbers that exist are for the subtree that you just calculated)
+    # NEGATIVE VALUES ARE THE SUBTREE FOR THE LEFT CHILD
+    
     childProportions <- otuPropsPerNode
         
-    otuPropsPerNode[,which(colnames(otuPropsPerNode) %in% unifrac.treeLeaves)] <- abs(otuPropsPerNode[,which(colnames(otuPropsPerNode) %in% unifrac.treeLeaves)])
-    otuPropsPerNode[,which(!(colnames(otuPropsPerNode) %in% unifrac.treeLeaves))] <- (-1)*abs(otuPropsPerNode[,which(!(colnames(otuPropsPerNode) %in% unifrac.treeLeaves))])
-    
-    otuPropsPerNode.adjustedZeros[,which(colnames(otuPropsPerNode.adjustedZeros) %in% unifrac.treeLeaves)] <- abs(otuPropsPerNode.adjustedZeros[,which(colnames(otuPropsPerNode.adjustedZeros) %in% unifrac.treeLeaves)])
-    otuPropsPerNode.adjustedZeros[,which(!(colnames(otuPropsPerNode.adjustedZeros) %in% unifrac.treeLeaves))] <- (-1)*abs(otuPropsPerNode.adjustedZeros[,which(!(colnames(otuPropsPerNode.adjustedZeros) %in% unifrac.treeLeaves))])
-    
     # construct values for right child
     build_weights(children[2])
     
-    # amalgamate children (turn negative numbers from left child construction into positive numbers, figure out which leaves you want)
+    # NEGATIVE VALUES ARE THE SUBTREE FOR THE RIGHT CHILD
     
-    # non leaf nodes keep positive
-    # leaf nodes keep negative
-    otuPropsPerNode[,which(colnames(childProportions) %in% unifrac.treeLeaves & childProportions[1,] < 0)] <- (-1)*abs(otuPropsPerNode[,which(colnames(childProportions) %in% unifrac.treeLeaves & childProportions[1,] < 0)])
-    otuPropsPerNode[,which(!(colnames(childProportions) %in% unifrac.treeLeaves) & childProportions[1,] > 0)] <- abs(otuPropsPerNode[,which(!(colnames(childProportions) %in% unifrac.treeLeaves) & childProportions[1,] > 0)])
+    # TODO LEAVES THAT ARE NEGATIVE IN EITHER CHILDREN SHOULD BE REMOVED FROM WEIGHT CALCULATION
     
-    otuPropsPerNode.adjustedZeros[,which(colnames(childProportions) %in% unifrac.treeLeaves & childProportions[1,] < 0)] <- (-1)*abs(otuPropsPerNode.adjustedZeros[,which(colnames(childProportions) %in% unifrac.treeLeaves & childProportions[1,] < 0)])
-    otuPropsPerNode.adjustedZeros[,which(!(colnames(childProportions) %in% unifrac.treeLeaves) & childProportions[1,] > 0)] <- abs(otuPropsPerNode.adjustedZeros[,which(!(colnames(childProportions) %in% unifrac.treeLeaves) & childProportions[1,] > 0)])
-    
+    # TODO CHILDREN SHOULD BE INCLUDED IN WEIGHT CALCULATION
+        
     #calculate proportion and weight of current node
     otuPropsPerNode[,root] <- otuPropsPerNode[,children[1]] + otuPropsPerNode[,children[2]]
     otuPropsPerNode[,children[1]] <- (-1)*abs(otuPropsPerNode[,children[1]])
@@ -80,6 +74,9 @@ build_weights = function(root) {
     
     weightsPerNode[,root] <- sapply(c(1:nrow(otuPropsPerNode.adjustedZeros)),function(x) { gm_from_props(x, root) })
   }
+  # make root node values negative
+  otuPropsPerNode[,root] <- (-1)*abs(otuPropsPerNode[,root])
+  otuPropsPerNode.adjustedZeros[,root] <- (-1)*abs(otuPropsPerNode.adjustedZeros[,root]
 }
 
 
