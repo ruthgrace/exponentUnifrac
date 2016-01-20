@@ -32,8 +32,8 @@ gm_mean = function(x, na.rm=TRUE){
 #   return(gm_vec)
 # }
 
-gm_from_props = function(rownum, root) {
-  return(log2(otuPropsPerNode.adjustedZeros[rownum,root]) - mean(log2(otuPropsPerNode.adjustedZeros[rownum,which(otuPropsPerNode.adjustedZeros[rownum,]>0)])))
+gm_from_props = function(rownum, colnums) {
+  return(log2(otuPropsPerNode.adjustedZeros[rownum,colnames[1]]) - mean(log2(otuPropsPerNode.adjustedZeros[rownum,colnums])))
 }
 
 build_weights = function(root) {
