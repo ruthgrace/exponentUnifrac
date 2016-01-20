@@ -42,15 +42,12 @@ otu_indicies <- otu_indicies[!is.na(otu_indicies)]
 breastmilk.otu.tab <- breastmilk.otu.tab[otu_indicies,]
 MyMetaOrdered <- MyMeta[match(rownames(breastmilk.otu.tab),rownames(MyMeta)),]
 
-breastmilk.otu.tab <- t(breastmilk.otu.tab)
-breastmilk.otu.tab.rarefy <- t(breastmilk.otu.tab.rarefy)
-
-otuTable <- breastmilk.otu.tab.rarefy
-tree <- breastmilk.tree
-method = "unweighted"
-verbose = TRUE
-pruneTree = FALSE
-normalize = TRUE
+# otuTable <- breastmilk.otu.tab.rarefy
+# tree <- breastmilk.tree
+# method = "unweighted"
+# verbose = TRUE
+# pruneTree = FALSE
+# normalize = TRUE
 
 unweighted <- getDistanceMatrix(breastmilk.otu.tab.rarefy,breastmilk.tree,method="unweighted",verbose=TRUE)
 weighted <- getDistanceMatrix(breastmilk.otu.tab,breastmilk.tree,method="weighted",verbose=TRUE)
