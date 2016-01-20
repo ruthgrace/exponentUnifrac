@@ -33,7 +33,7 @@ gm_mean = function(x, na.rm=TRUE){
 # }
 
 gm_from_props = function(rownum, colnums) {
-  return(log2(otuPropsPerNode.adjustedZeros[rownum,colnames[1]]) - mean(log2(otuPropsPerNode.adjustedZeros[rownum,colnums])))
+  return(log2(otuPropsPerNode.adjustedZeros[rownum,colnums[1]]) - mean(log2(otuPropsPerNode.adjustedZeros[rownum,colnums])))
 }
 
 build_weights = function(root) {
@@ -56,26 +56,26 @@ build_weights = function(root) {
     # the negative values in leftChildProportions are for all the nodes in the subtree of the left child
     # the negative values in rightChildProportions are for all the nodes in the subtree of the right child
     
-    leafColumns <- which(colnames(otuPropsPerNode) %in% unifrac.treeLeaves)
+    leafColumns <- colnames(leftChildProportions)[which(colnames(otuPropsPerNode) %in% unifrac.treeLeaves)]
     
     leftChildSubtree <- colnames(leftChildProportions)[which(leftChildProportions[1,] < 0)]
     rightChildSubtree <- colnames(rightChildProportions)[which(rightChildProportions[1,] < 0)]
     
     columnsForWeightCalculation <- leafColumns
-    columnsForWeightCalculation <- which(!(leafColumnsForWeightCalculation %in% leftChildSubtree))
-    columnsForWeightCalculation <- which(!(leafColumnsForWeightCalculation %in% rightChildSubtree))
+    columnsForWeightCalculation <- columnsForWeightCalculation[which(!(columnsForWeightCalculation %in% leftChildSubtree))]
+    columnsForWeightCalculation <- columnsForWeightCalculation[which(!(columnsForWeightCalculation %in% rightChildSubtree))]
     columnsForWeightCalculation <- c(root, columnsForWeightCalculation)
     
     # calculate proportion of current node
-    otuPropsPerNode[,root] <- otuPropsPerNode[,children[1]] + otuPropsPerNode[,children[2]]
-    otuPropsPerNode.adjustedZeros[,root] <- otuPropsPerNode.adjustedZeros[,children[1]] + otuPropsPerNode.adjustedZeros[,children[2]]
+    otuPropsPerNode[,root] <- abs(otuPropsPerNode[,children[1]]) + abs(otuPropsPerNode[,children[2]])
+    otuPropsPerNode.adjustedZeros[,root] <- abs(otuPropsPerNode.adjustedZeros[,children[1]]) + abs(otuPropsPerNode.adjustedZeros[,children[2]])
     
     # calculate weight of current node
     weightsPerNode[,root] <- sapply(c(1:nrow(otuPropsPerNode.adjustedZeros)),function(x) { gm_from_props(x, columnsForWeightCalculation)})
   }
   # make root node values negative
   otuPropsPerNode[,root] <- (-1)*abs(otuPropsPerNode[,root])
-  otuPropsPerNode.adjustedZeros[,root] <- (-1)*abs(otuPropsPerNode.adjustedZeros[,root]
+  otuPropsPerNode.adjustedZeros[,root] <- (-1)*abs(otuPropsPerNode.adjustedZeros[,root])
 }
 
 
