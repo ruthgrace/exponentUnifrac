@@ -33,11 +33,14 @@ gm_mean = function(x, na.rm=TRUE){
 # }
 
 gm_from_props = function(rownum, colnums) {
+  otuPropsPerNode.adjustedZeros <- get("otuPropsPerNode.adjustedZeros",envir = .GlobalEnv)
   return(log2(otuPropsPerNode.adjustedZeros[rownum,colnums[1]]) - mean(log2(otuPropsPerNode.adjustedZeros[rownum,colnums])))
 }
 
 build_weights = function(root) {
-  print(paste("building weights for node ",root))
+  otuPropsPerNode <- get("otuPropsPerNode",envir = .GlobalEnv)
+  otuPropsPerNode.adjustedZeros <- get("otuPropsPerNode.adjustedZeros",envir = .GlobalEnv)
+  weightsPerNode <- get("weightsPerNode",envir = .GlobalEnv)
   # make all weight values positive
   otuPropsPerNode <- abs(otuPropsPerNode)
   otuPropsPerNode.adjustedZeros <- abs(otuPropsPerNode.adjustedZeros)
@@ -48,7 +51,7 @@ build_weights = function(root) {
     # construct values for left child
     build_weights(children[1])
     leftChildProportions <- otuPropsPerNode.adjustedZeros
-        
+    
     # construct values for right child
     build_weights(children[2])
     rightChildProportions <- otuPropsPerNode.adjustedZeros
@@ -81,6 +84,15 @@ build_weights = function(root) {
   # make root node values negative
   otuPropsPerNode[,root] <- (-1)*abs(otuPropsPerNode[,root])
   otuPropsPerNode.adjustedZeros[,root] <- (-1)*abs(otuPropsPerNode.adjustedZeros[,root])
+  
+  #debug - print out props at end
+  if (root == 233) {
+    write.table(otuPropsPerNode,file="otuPropsPerNode.txt",sep="\t",quote=FALSE)
+    write.table(otuPropsPerNode.adjustedZeros,file="otuPropsPerNode.adjustedZeros.txt",sep="\t",quote=FALSE)
+  }
+  assign("otuPropsPerNode", otuPropsPerNode, envir = .GlobalEnv)
+  assign("otuPropsPerNode.adjustedZeros", otuPropsPerNode.adjustedZeros, envir = .GlobalEnv)
+  assign("weightsPerNode", weightsPerNode, envir = .GlobalEnv)
 }
 
 
@@ -164,8 +176,6 @@ getDistanceMatrix <- function(otuTable,tree,method="weighted",verbose=FALSE,prun
   root <- tree$edge[nrow(tree$edge),1]
 
   if(verbose) {	print("calculating weights...")	}
-  
-  #TODO function doesn't do upper nodes :(
   
   build_weights(root)
 
