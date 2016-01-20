@@ -45,22 +45,26 @@ build_weights = function(root) {
   if (root > length(unifrac.tree$tip.label)) {
     children <- unifrac.tree$edge[which(unifrac.tree$edge[,1]==root),2]
     
-    # construct values for one child
+    # construct values for left child
     build_weights(children[1])
-    
-    # NEGATIVE VALUES ARE THE SUBTREE FOR THE LEFT CHILD
-    
-    childProportions <- otuPropsPerNode
+    leftChildProportions <- otuPropsPerNode
         
     # construct values for right child
     build_weights(children[2])
+    rightChildProportions <- otuPropsPerNode
     
-    # NEGATIVE VALUES ARE THE SUBTREE FOR THE RIGHT CHILD
+    # the negative values in leftChildProportions are for all the nodes in the subtree of the left child
+    # the negative values in rightChildProportions are for all the nodes in the subtree of the right child
     
-    # TODO LEAVES THAT ARE NEGATIVE IN EITHER CHILDREN SHOULD BE REMOVED FROM WEIGHT CALCULATION
+    leafColumns <- which(colnames(otuPropsPerNode) %in% unifrac.treeLeaves)
     
-    # TODO CHILDREN SHOULD BE INCLUDED IN WEIGHT CALCULATION
-        
+    leftChildSubtree <- colnames(leftChildProportions)[which(leftChildProportions[1,] < 0)]
+    rightChildSubtree <- colnames(rightChildProportions)[which(rightChildProportions[1,] < 0)]
+    
+    leafColumnsForWeightCalculation <- leafColumns
+    leafColumnsForWeightCalculation <- which(!(leafColumnsForWeightCalculation %in% leftChildSubtree))
+    leafColumnsForWeightCalculation <- which(!(leafColumnsForWeightCalculation %in% rightChildSubtree))
+    
     #calculate proportion and weight of current node
     otuPropsPerNode[,root] <- otuPropsPerNode[,children[1]] + otuPropsPerNode[,children[2]]
     otuPropsPerNode[,children[1]] <- (-1)*abs(otuPropsPerNode[,children[1]])
