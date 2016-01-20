@@ -88,8 +88,6 @@ build_weights = function(root) {
     
     # calculate weight of current node
     weightsPerNode[,root] <- sapply(c(1:nrow(otuPropsPerNode.adjustedZeros)),function(x) { gm_from_props(x, columnsForWeightCalculation)})
-    print("COLNUMS")
-    print(paste(columnsForWeightCalculation,collapse=","))
   }
   # make root node values negative
   otuPropsPerNode[,root] <- (-1)*abs(otuPropsPerNode[,root])
