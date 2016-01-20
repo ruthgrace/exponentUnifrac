@@ -191,6 +191,10 @@ getDistanceMatrix <- function(otuTable,tree,method="weighted",verbose=FALSE,prun
   otuPropsPerNode.adjustedZeros <- get("otuPropsPerNode.adjustedZeros",envir = .GlobalEnv)
   weightsPerNode <- get("weightsPerNode",envir = .GlobalEnv)
   
+  # build_weights makes everything negative, make everything positive again
+  otuPropsPerNode[,c(1:ncol(otuPropsPerNode))] <- abs(otuPropsPerNode[,c(1:ncol(otuPropsPerNode))])
+  otuPropsPerNode.adjustedZeros[,c(1:ncol(otuPropsPerNode.adjustedZeros))] <- abs(otuPropsPerNode.adjustedZeros[,c(1:ncol(otuPropsPerNode.adjustedZeros))])
+  
   if(verbose) {	print("calculating pairwise distances...")	}
   
   nSamples <- nrow(otuTable)
@@ -199,6 +203,8 @@ getDistanceMatrix <- function(otuTable,tree,method="weighted",verbose=FALSE,prun
   colnames(distanceMatrix) <- rownames(otuTable)
   
   branchLengths <- tree$edge.length
+  
+  # TODO: REMOVE THE ROOT AND MAKE SURE THAT WEIGHTS ARE ALIGNED WITH BRANCH LENGTHS
   
   #convert table according to weight
   if (method=="information") {
