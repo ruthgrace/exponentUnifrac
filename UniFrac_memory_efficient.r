@@ -47,11 +47,11 @@ build_weights = function(root) {
     
     # construct values for left child
     build_weights(children[1])
-    leftChildProportions <- otuPropsPerNode
+    leftChildProportions <- otuPropsPerNode.adjustedZeros
         
     # construct values for right child
     build_weights(children[2])
-    rightChildProportions <- otuPropsPerNode
+    rightChildProportions <- otuPropsPerNode.adjustedZeros
     
     # the negative values in leftChildProportions are for all the nodes in the subtree of the left child
     # the negative values in rightChildProportions are for all the nodes in the subtree of the right child
@@ -61,6 +61,11 @@ build_weights = function(root) {
     leftChildSubtree <- colnames(leftChildProportions)[which(leftChildProportions[1,] < 0)]
     rightChildSubtree <- colnames(rightChildProportions)[which(rightChildProportions[1,] < 0)]
     
+    # make both left and right child subtrees negative
+    otuPropsPerNode[,which(leftChildProportions[1,] < 0)] <- (-1)*abs(otuPropsPerNode[,which(leftChildProportions[1,] < 0)])
+    otuPropsPerNode.adjustedZeros[,which(leftChildProportions[1,] < 0)] <- (-1)*abs(otuPropsPerNode.adjustedZeros[,which(leftChildProportions[1,] < 0)])
+    
+    # get columns for use in weight calculation (leaves not in right or left subtree plus root)
     columnsForWeightCalculation <- leafColumns
     columnsForWeightCalculation <- columnsForWeightCalculation[which(!(columnsForWeightCalculation %in% leftChildSubtree))]
     columnsForWeightCalculation <- columnsForWeightCalculation[which(!(columnsForWeightCalculation %in% rightChildSubtree))]
