@@ -50,10 +50,16 @@ build_weights = function(root) {
     
     # construct values for left child
     build_weights(children[1])
+    otuPropsPerNode <- get("otuPropsPerNode",envir = .GlobalEnv)
+    otuPropsPerNode.adjustedZeros <- get("otuPropsPerNode.adjustedZeros",envir = .GlobalEnv)
+    weightsPerNode <- get("weightsPerNode",envir = .GlobalEnv)
     leftChildProportions <- otuPropsPerNode.adjustedZeros
     
     # construct values for right child
     build_weights(children[2])
+    otuPropsPerNode <- get("otuPropsPerNode",envir = .GlobalEnv)
+    otuPropsPerNode.adjustedZeros <- get("otuPropsPerNode.adjustedZeros",envir = .GlobalEnv)
+    weightsPerNode <- get("weightsPerNode",envir = .GlobalEnv)
     rightChildProportions <- otuPropsPerNode.adjustedZeros
     
     # the negative values in leftChildProportions are for all the nodes in the subtree of the left child
@@ -77,9 +83,13 @@ build_weights = function(root) {
     # calculate proportion of current node
     otuPropsPerNode[,root] <- abs(otuPropsPerNode[,children[1]]) + abs(otuPropsPerNode[,children[2]])
     otuPropsPerNode.adjustedZeros[,root] <- abs(otuPropsPerNode.adjustedZeros[,children[1]]) + abs(otuPropsPerNode.adjustedZeros[,children[2]])
+    assign("otuPropsPerNode", otuPropsPerNode, envir = .GlobalEnv)
+    assign("otuPropsPerNode.adjustedZeros", otuPropsPerNode.adjustedZeros, envir = .GlobalEnv)
     
     # calculate weight of current node
     weightsPerNode[,root] <- sapply(c(1:nrow(otuPropsPerNode.adjustedZeros)),function(x) { gm_from_props(x, columnsForWeightCalculation)})
+    print("COLNUMS")
+    print(paste(columnsForWeightCalculation,collapse=","))
   }
   # make root node values negative
   otuPropsPerNode[,root] <- (-1)*abs(otuPropsPerNode[,root])
@@ -178,7 +188,11 @@ getDistanceMatrix <- function(otuTable,tree,method="weighted",verbose=FALSE,prun
   if(verbose) {	print("calculating weights...")	}
   
   build_weights(root)
-
+  
+  otuPropsPerNode <- get("otuPropsPerNode",envir = .GlobalEnv)
+  otuPropsPerNode.adjustedZeros <- get("otuPropsPerNode.adjustedZeros",envir = .GlobalEnv)
+  weightsPerNode <- get("weightsPerNode",envir = .GlobalEnv)
+  
   if(verbose) {	print("calculating pairwise distances...")	}
   
   nSamples <- nrow(otuTable)
