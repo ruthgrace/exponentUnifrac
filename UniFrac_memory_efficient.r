@@ -61,22 +61,17 @@ build_weights = function(root) {
     leftChildSubtree <- colnames(leftChildProportions)[which(leftChildProportions[1,] < 0)]
     rightChildSubtree <- colnames(rightChildProportions)[which(rightChildProportions[1,] < 0)]
     
-    leafColumnsForWeightCalculation <- leafColumns
-    leafColumnsForWeightCalculation <- which(!(leafColumnsForWeightCalculation %in% leftChildSubtree))
-    leafColumnsForWeightCalculation <- which(!(leafColumnsForWeightCalculation %in% rightChildSubtree))
+    columnsForWeightCalculation <- leafColumns
+    columnsForWeightCalculation <- which(!(leafColumnsForWeightCalculation %in% leftChildSubtree))
+    columnsForWeightCalculation <- which(!(leafColumnsForWeightCalculation %in% rightChildSubtree))
+    columnsForWeightCalculation <- c(root, columnsForWeightCalculation)
     
-    #calculate proportion and weight of current node
+    # calculate proportion of current node
     otuPropsPerNode[,root] <- otuPropsPerNode[,children[1]] + otuPropsPerNode[,children[2]]
-    otuPropsPerNode[,children[1]] <- (-1)*abs(otuPropsPerNode[,children[1]])
-    otuPropsPerNode[,children[2]] <- (-1)*abs(otuPropsPerNode[,children[2]])
-    
     otuPropsPerNode.adjustedZeros[,root] <- otuPropsPerNode.adjustedZeros[,children[1]] + otuPropsPerNode.adjustedZeros[,children[2]]
-    otuPropsPerNode.adjustedZeros[,children[1]] <- (-1)*abs(otuPropsPerNode.adjustedZeros[,children[1]])
-    otuPropsPerNode.adjustedZeros[,children[2]] <- (-1)*abs(otuPropsPerNode.adjustedZeros[,children[2]])
-
-    # TODO fix - the new weightsPerNode is all negative, and the CLR values aren't zeros
     
-    weightsPerNode[,root] <- sapply(c(1:nrow(otuPropsPerNode.adjustedZeros)),function(x) { gm_from_props(x, root) })
+    # calculate weight of current node
+    weightsPerNode[,root] <- sapply(c(1:nrow(otuPropsPerNode.adjustedZeros)),function(x) { gm_from_props(x, columnsForWeightCalculation)})
   }
   # make root node values negative
   otuPropsPerNode[,root] <- (-1)*abs(otuPropsPerNode[,root])
