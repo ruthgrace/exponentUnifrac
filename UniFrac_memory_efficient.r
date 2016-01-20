@@ -130,7 +130,7 @@ getDistanceMatrix <- function(otuTable,tree,method="weighted",verbose=FALSE,prun
   unifrac.treeLeaves <- get("unifrac.treeLeaves", envir = .GlobalEnv)
   
 	# get proportions
-	readsPerSample <- apply(otuTable,1,sum)
+	readsPerSample <- apply(otuTable,2,sum)
 	otu.prop <- t(t(otuTable)/readsPerSample)
 	otu.prop <- as.matrix(otu.prop)
 	rownames(otu.prop) <- rownames(otuTable)
