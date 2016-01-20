@@ -120,6 +120,9 @@ getDistanceMatrix <- function(otuTable,tree,method="weighted",verbose=FALSE,prun
     geometric_means[,parentNode] <- gm_vector(absolute_weights[,parentNode],otuCountsPerNode[,parentNode,],geometric_mean)
 	}
 
+  write.table(weights, file = paste("original_unifrac_weights_",method,".txt",sep=""))
+  write.table(absolute_weights, file = paste("original_unifrac_absolute_weights_",method,".txt",sep=""))
+  write.table(geometric_means, file = paste("original_unifrac_geometric_means_",method,".txt",sep=""))
 
 	if(verbose) {	print("done calculating weights")	}
 

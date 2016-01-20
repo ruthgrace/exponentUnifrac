@@ -5,14 +5,6 @@ library(phangorn)
 library(ape)
 library(zCompositions)
 
-# global variables - used to save memory when being passed between functions
-# otuPropsPerNode <- "global"
-# otuPropsPerNode.adjustedZeros <- "global"
-# weightsPerNode <- "global"
-# unifrac.tree <- "global"
-# unifrac.method <- "global"
-# unifrac.treeLeaves <- "global"
-
 gm_mean = function(x, na.rm=TRUE){
   exp(mean(log(x), na.rm=na.rm) )
 }
@@ -41,6 +33,8 @@ build_weights = function(root) {
   otuPropsPerNode <- get("otuPropsPerNode",envir = .GlobalEnv)
   otuPropsPerNode.adjustedZeros <- get("otuPropsPerNode.adjustedZeros",envir = .GlobalEnv)
   weightsPerNode <- get("weightsPerNode",envir = .GlobalEnv)
+  unifrac.tree <- get("unifrac.tree",envir=.GlobalEnv)
+  unifrac.treeLeaves <- get("unifrac.treeLeaves",envir=.GlobalEnv)
   # make all weight values positive
   otuPropsPerNode <- abs(otuPropsPerNode)
   otuPropsPerNode.adjustedZeros <- abs(otuPropsPerNode.adjustedZeros)
@@ -128,17 +122,16 @@ getDistanceMatrix <- function(otuTable,tree,method="weighted",verbose=FALSE,prun
 	}
   
   #make globally available copy of tree
-  unifrac.tree <<- tree
-  
-  #make globally available copy of method
-  unifrac.method <<- method
+  assign("unifrac.tree", tree, envir = .GlobalEnv)
+  unifrac.tree <- get("unifrac.tree", envir = .GlobalEnv)
   
   #make globally available copy of leaves
-  unifrac.treeLeaves <<- c(1:length(tree$tip.label))
-
+  assign("unifrac.treeLeaves", c(1:length(tree$tip.label)), envir = .GlobalEnv)
+  unifrac.treeLeaves <- get("unifrac.treeLeaves", envir = .GlobalEnv)
+  
 	# get proportions
 	readsPerSample <- apply(otuTable,1,sum)
-	otu.prop <- otuTable/readsPerSample
+	otu.prop <- t(t(otuTable)/readsPerSample)
 	otu.prop <- as.matrix(otu.prop)
 	rownames(otu.prop) <- rownames(otuTable)
 	colnames(otu.prop) <- colnames(otuTable)
@@ -159,9 +152,9 @@ getDistanceMatrix <- function(otuTable,tree,method="weighted",verbose=FALSE,prun
 
 	##get cumulative proportional abundance for the nodes (nodes are ordered same as in the phylo tree representation)
 
-  otuPropsPerNode <<- matrix(NA, ncol=length(tree$edge.length)+1, nrow=length(colnames(otuTable)))
-  otuPropsPerNode.adjustedZeros <<- matrix(NA, ncol=length(tree$edge.length)+1, nrow=length(colnames(otuTable)))
-  weightsPerNode <<- matrix(NA, ncol=length(tree$edge.length)+1, nrow=length(colnames(otuTable)))
+  otuPropsPerNode <- matrix(NA, ncol=length(tree$edge.length)+1, nrow=length(colnames(otuTable)))
+  otuPropsPerNode.adjustedZeros <- matrix(NA, ncol=length(tree$edge.length)+1, nrow=length(colnames(otuTable)))
+  weightsPerNode <- matrix(NA, ncol=length(tree$edge.length)+1, nrow=length(colnames(otuTable)))
   
 	#each row is a sample
   rownames(otuPropsPerNode) <- colnames(otuTable)
@@ -185,11 +178,19 @@ getDistanceMatrix <- function(otuTable,tree,method="weighted",verbose=FALSE,prun
 
   if(verbose) {	print("calculating weights...")	}
   
+  assign("otuPropsPerNode", otuPropsPerNode, envir = .GlobalEnv)
+  assign("otuPropsPerNode.adjustedZeros", otuPropsPerNode.adjustedZeros, envir = .GlobalEnv)
+  assign("weightsPerNode", weightsPerNode, envir = .GlobalEnv)
+  
   build_weights(root)
   
   otuPropsPerNode <- get("otuPropsPerNode",envir = .GlobalEnv)
   otuPropsPerNode.adjustedZeros <- get("otuPropsPerNode.adjustedZeros",envir = .GlobalEnv)
   weightsPerNode <- get("weightsPerNode",envir = .GlobalEnv)
+  
+  write.table(otuPropsPerNode, file = paste("memory_efficient_unifrac_otuPropsPerNode_",method,".txt",sep=""))
+  write.table(otuPropsPerNode.adjustedZeros, file = paste("memory_efficient_unifrac_otuPropsPerNode.adjustedZeros_",method,".txt",sep=""))
+  write.table(weightsPerNode, file = paste("memory_efficient_unifrac_weightsPerNode_",method,".txt",sep=""))
   
   # build_weights makes everything negative, make everything positive again
   otuPropsPerNode[,c(1:ncol(otuPropsPerNode))] <- abs(otuPropsPerNode[,c(1:ncol(otuPropsPerNode))])
