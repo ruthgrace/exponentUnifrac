@@ -4,7 +4,7 @@ options(error=recover)
 #this script prints out PDF pcoa plots and distance matrices, given an OTU table, phylogenetic tree, and metadata
 # run in bash like: nohup Rscript gut_saliva_script.r > gut_saliva_script_nohup.out 2>&1&
 
-source("UniFrac.r")
+source("UniFrac_memory_efficient.r")
 library(ape)
 library(phangorn)
 library(vegan)
@@ -121,6 +121,11 @@ plot_all_gut_saliva_unifrac <- function(count_file, tree_file, output_file) {
 
 	dev.off()
 }
+
+## for testing/debugging purposes
+# count_file <- "data/gut_saliva_data/low_sequencing_depth_hmp_data.txt"
+# tree_file <- "data/gut_saliva_data/low_sequencing_depth_subtree.tre"
+# output_file <- "gut_vs_saliva_sequencing_depth_less_than_3000.pdf"
 
 plot_all_gut_saliva_unifrac("data/gut_saliva_data/low_sequencing_depth_hmp_data.txt", "data/gut_saliva_data/low_sequencing_depth_subtree.tre","gut_vs_saliva_sequencing_depth_less_than_3000.pdf")
 plot_all_gut_saliva_unifrac("data/gut_saliva_data/med_sequencing_depth_hmp_data.txt", "data/gut_saliva_data/med_sequencing_depth_subtree.tre","gut_vs_saliva_sequencing_depth_3000_to_6000.pdf")

@@ -111,7 +111,7 @@ exponent.pc1.varEx <- sd(exponent.pcoa$vector[,1])*sd(exponent.pcoa$vector[,1])/
 exponent.pc2.varEx <- sd(exponent.pcoa$vector[,2])*sd(exponent.pcoa$vector[,2])/exponent.varExplained
 
 #save plots as PDF
-pdf("original_unifrac_breastmilk_pcoa_plots_infected.pdf")
+pdf("breastmilk_output/original_unifrac_breastmilk_pcoa_plots_infected.pdf")
 
 
 # # MAKE BAR PLOTS

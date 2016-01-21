@@ -189,11 +189,7 @@ getDistanceMatrix <- function(otuTable,tree,method="weighted",verbose=FALSE,prun
   otuPropsPerNode <- get("otuPropsPerNode",envir = .GlobalEnv)
   otuPropsPerNode.adjustedZeros <- get("otuPropsPerNode.adjustedZeros",envir = .GlobalEnv)
   weightsPerNode <- get("weightsPerNode",envir = .GlobalEnv)
-  
-  write.table(otuPropsPerNode, file = paste("memory_efficient_unifrac_otuPropsPerNode_",method,".txt",sep=""))
-  write.table(otuPropsPerNode.adjustedZeros, file = paste("memory_efficient_unifrac_otuPropsPerNode.adjustedZeros_",method,".txt",sep=""))
-  write.table(weightsPerNode, file = paste("memory_efficient_unifrac_weightsPerNode_",method,".txt",sep=""))
-  
+    
   # build_weights makes everything negative, make everything positive again
   otuPropsPerNode[,c(1:ncol(otuPropsPerNode))] <- abs(otuPropsPerNode[,c(1:ncol(otuPropsPerNode))])
   otuPropsPerNode.adjustedZeros[,c(1:ncol(otuPropsPerNode.adjustedZeros))] <- abs(otuPropsPerNode.adjustedZeros[,c(1:ncol(otuPropsPerNode.adjustedZeros))])
