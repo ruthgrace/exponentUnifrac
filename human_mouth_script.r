@@ -2,6 +2,7 @@
 options(error=recover)
 
 #this script prints out PDF pcoa plots and distance matrices, given an OTU table, phylogenetic tree, and metadata
+# run: nohup Rscript ./human_mouth_script.r > human_mouth_script_nohup.out 2>&1&
 
 source("UniFrac_memory_efficient.r")
 library(ape)
