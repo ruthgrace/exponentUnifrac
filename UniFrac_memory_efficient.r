@@ -212,6 +212,7 @@ getDistanceMatrix <- function(otuTable,tree,method="weighted",verbose=FALSE,prun
     weights <- otuPropsPerNode.adjustedZeros*log2(otuPropsPerNode.adjustedZeros)
   } else if (method=="exponent") {
     weights <- weightsPerNode
+    weights <- 2^weights
   } else {
     weights <- otuPropsPerNode
   }

@@ -179,7 +179,6 @@ getDistanceMatrix <- function(otuTable,tree,method="weighted",verbose=FALSE,prun
 							distance <- sum( branchLengths * abs(weights[i,] - weights[j,]) )/sum(branchLengths * (weights[i,] + weights[j,]))
 						}
 					}
-
 				}
 			else {
 				if (method!="unweighted") {
