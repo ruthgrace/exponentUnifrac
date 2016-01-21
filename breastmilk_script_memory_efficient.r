@@ -44,7 +44,7 @@ MyMetaOrdered <- MyMeta[match(rownames(breastmilk.otu.tab),rownames(MyMeta)),]
 
 otuTable <- breastmilk.otu.tab
 tree <- breastmilk.tree
-method = "exponent"
+method = "ratio"
 verbose = TRUE
 pruneTree = FALSE
 normalize = TRUE
@@ -52,7 +52,7 @@ normalize = TRUE
 unweighted <- getDistanceMatrix(breastmilk.otu.tab.rarefy,breastmilk.tree,method="unweighted",verbose=TRUE)
 weighted <- getDistanceMatrix(breastmilk.otu.tab,breastmilk.tree,method="weighted",verbose=TRUE)
 information <- getDistanceMatrix(breastmilk.otu.tab,breastmilk.tree,method="information",verbose=TRUE)
-exponent <- getDistanceMatrix(breastmilk.otu.tab,breastmilk.tree,method="exponent",verbose=TRUE)
+ratio <- getDistanceMatrix(breastmilk.otu.tab,breastmilk.tree,method="ratio",verbose=TRUE)
 
 groups <- rep("Not Infected",length(MyMetaOrdered$Gestation))
 groups[which(rownames(MyMetaOrdered)=="S38I")] <- "Infected"
@@ -95,13 +95,13 @@ otuSum <- apply(breastmilk.otu.tab,1,sum)
 unweighted.pcoa <- pcoa(unweighted)
 weighted.pcoa <- pcoa(weighted)
 information.pcoa <- pcoa(information)
-exponent.pcoa <- pcoa(exponent)
+ratio.pcoa <- pcoa(ratio)
 
 # calculate total variance explained
 unweighted.varExplained <- sum(apply(unweighted.pcoa$vector,2,function(x) sd(x)*sd(x)))
 weighted.varExplained <- sum(apply(weighted.pcoa$vector,2,function(x) sd(x)*sd(x)))
 information.varExplained <- sum(apply(information.pcoa$vector,2,function(x) sd(x)*sd(x)))
-exponent.varExplained <- sum(apply(exponent.pcoa$vector,2,function(x) sd(x)*sd(x)))
+ratio.varExplained <- sum(apply(ratio.pcoa$vector,2,function(x) sd(x)*sd(x)))
 
 # calculate proportion of variance explained by first component
 unweighted.pc1.varEx <- sd(unweighted.pcoa$vector[,1])*sd(unweighted.pcoa$vector[,1])/unweighted.varExplained
@@ -114,11 +114,11 @@ weighted.pc2.varEx <- sd(weighted.pcoa$vector[,2])*sd(weighted.pcoa$vector[,2])/
 information.pc1.varEx <- sd(information.pcoa$vector[,1])*sd(information.pcoa$vector[,1])/information.varExplained
 information.pc2.varEx <- sd(information.pcoa$vector[,2])*sd(information.pcoa$vector[,2])/information.varExplained
 
-exponent.pc1.varEx <- sd(exponent.pcoa$vector[,1])*sd(exponent.pcoa$vector[,1])/exponent.varExplained
-exponent.pc2.varEx <- sd(exponent.pcoa$vector[,2])*sd(exponent.pcoa$vector[,2])/exponent.varExplained
+ratio.pc1.varEx <- sd(ratio.pcoa$vector[,1])*sd(ratio.pcoa$vector[,1])/ratio.varExplained
+ratio.pc2.varEx <- sd(ratio.pcoa$vector[,2])*sd(ratio.pcoa$vector[,2])/ratio.varExplained
 
 #save plots as PDF
-pdf("efficient_unifrac_breastmilk_pcoa_plots_infected.pdf")
+pdf("breastmilk_output/efficient_unifrac_breastmilk_pcoa_plots_infected.pdf")
 
 
 # # MAKE BAR PLOTS
@@ -182,7 +182,7 @@ plot(information.pcoa$vectors[,1],information.pcoa$vectors[,2], col=groups,main=
 # #placement with S38I excluded
 # legend(0.4,-0.15,levels(groups),col=palette(),pch=19)
 
-plot(exponent.pcoa$vectors[,1],exponent.pcoa$vectors[,2], col=groups,main="Exponent UniFrac\nprincipal coordinate analysis",xlab=paste("First Component", round(exponent.pc1.varEx,digits=3),"variance explained"),ylab=paste("Second Component", round(exponent.pc2.varEx,digits=3),"variance explained"),pch=19,cex.lab=1.4,cex.main=2)
+plot(ratio.pcoa$vectors[,1],ratio.pcoa$vectors[,2], col=groups,main="ratio UniFrac\nprincipal coordinate analysis",xlab=paste("First Component", round(ratio.pc1.varEx,digits=3),"variance explained"),ylab=paste("Second Component", round(ratio.pc2.varEx,digits=3),"variance explained"),pch=19,cex.lab=1.4,cex.main=2)
 
 # # BIPLOT
 # 
