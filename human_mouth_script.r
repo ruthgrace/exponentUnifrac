@@ -34,13 +34,13 @@ otu.tab.rarefy <- rrarefy(otu.tab, min(apply(otu.tab,1,sum)))
 #calculate distance matrix
 unweighted <- getDistanceMatrix(otu.tab.rarefy,tree,method="unweighted",verbose=TRUE)
 #output distance matrices
-write.table(unweighted,file="output/unweighted_distance_matrix.txt",sep="\t",quote=FALSE)
+write.table(unweighted,file="human_mouth_output/unweighted_distance_matrix.txt",sep="\t",quote=FALSE)
 weighted <- getDistanceMatrix(otu.tab,tree,method="weighted",verbose=TRUE)
-write.table(weighted,file="output/weighted_distance_matrix.txt",sep="\t",quote=FALSE)
+write.table(weighted,file="human_mouth_output/weighted_distance_matrix.txt",sep="\t",quote=FALSE)
 information <- getDistanceMatrix(otu.tab,tree,method="information",verbose=TRUE)
-write.table(information,file="output/information_distance_matrix.txt",sep="\t",quote=FALSE)
-exponent <- getDistanceMatrix(otu.tab,tree,method="exponent",verbose=TRUE)
-write.table(exponent,file="output/exponent_normalize_distance_matrix.txt",sep="\t",quote=FALSE)
+write.table(information,file="human_mouth_output/information_distance_matrix.txt",sep="\t",quote=FALSE)
+ratio <- getDistanceMatrix(otu.tab,tree,method="ratio",verbose=TRUE)
+write.table(ratio,file="human_mouth_output/ratio_normalize_distance_matrix.txt",sep="\t",quote=FALSE)
 
 #conditions (bv - bacterial vaginosis as scored by nugent/amsel, i - intermediate, n - normal/healthy)
 groups <- MyMetaOrdered
@@ -79,7 +79,7 @@ levels(taxonomyGroups) <- newLevels
 unweighted.pcoa <- pcoa(unweighted)
 weighted.pcoa <- pcoa(weighted)
 information.pcoa <- pcoa(information)
-exponent.pcoa <- pcoa(exponent)
+ratio.pcoa <- pcoa(ratio)
 
 
 #function to get variance explained for the PCOA component labels
@@ -94,28 +94,28 @@ getVarExplained <- function(vector) {
 unweighted.varEx <- getVarExplained(unweighted.pcoa$vectors)
 weighted.varEx <- getVarExplained(weighted.pcoa$vectors)
 information.varEx <- getVarExplained(information.pcoa$vectors)
-exponent.varEx <- getVarExplained(exponent.pcoa$vectors)
+ratio.varEx <- getVarExplained(ratio.pcoa$vectors)
 
 #get vector version of distance matrices for correlation plots below
 unweighted.vector <- unlist(unweighted[lower.tri(unweighted,diag=TRUE)])
 weighted.vector <- unlist(weighted[lower.tri(weighted,diag=TRUE)])
 information.vector <- unlist(information[lower.tri(information,diag=TRUE)])
-exponent.vector <- unlist(exponent[lower.tri(exponent,diag=TRUE)])
+ratio.vector <- unlist(ratio[lower.tri(ratio,diag=TRUE)])
 
-pdf("output/human_mouth_output/pcoa_plots.pdf")
+pdf("human_mouth_output/pcoa_plots.pdf")
 
 #plot pcoa plots
 plot(unweighted.pcoa$vectors[,1],unweighted.pcoa$vectors[,2], col=groups,main="Unweighted UniFrac\nprincipal coordinates analysis",xlab=paste("First Component", round(unweighted.varEx[1],digits=3),"variance explained"),ylab=paste("Second Component", round(unweighted.varEx[2],digits=3),"variance explained"),pch=19,cex.lab=1.4,cex.main=2)
 plot(weighted.pcoa$vectors[,1],weighted.pcoa$vectors[,2], col=groups,main="Weighted UniFrac\nprincipal coordinates analysis",xlab=paste("First Component", round(weighted.varEx[1],digits=3),"variance explained"),ylab=paste("Second Component", round(weighted.varEx[2],digits=3),"variance explained"),pch=19,cex.lab=1.4,cex.main=2)
 legend(0.2,0.32,levels(taxonomyGroups),col=palette(),pch=19)
 plot(information.pcoa$vectors[,1],information.pcoa$vectors[,2], col=groups,main="Information UniFrac\nprincipal coordinates analysis",xlab=paste("First Component", round(information.varEx[1],digits=3),"variance explained"),ylab=paste("Second Component", round(information.varEx[2],digits=3),"variance explained"),pch=19,cex.lab=1.4,cex.main=2)
-plot(exponent.pcoa$vectors[,1],exponent.pcoa$vectors[,2], col=groups,main="Exponent Normalized UniFrac\nprincipal coordinates analysis",xlab=paste("First Component", round(exponent.varEx[1],digits=3),"variance explained"),ylab=paste("Second Component", round(exponent.varEx[2],digits=3),"variance explained"),pch=19,cex.lab=1.4,cex.main=2)
+plot(ratio.pcoa$vectors[,1],ratio.pcoa$vectors[,2], col=groups,main="ratio Normalized UniFrac\nprincipal coordinates analysis",xlab=paste("First Component", round(ratio.varEx[1],digits=3),"variance explained"),ylab=paste("Second Component", round(ratio.varEx[2],digits=3),"variance explained"),pch=19,cex.lab=1.4,cex.main=2)
 
 #plot correlation between different UniFrac modes
 plot(unweighted.vector,information.vector,main="unweighted vs. information UniFrac")
 plot(weighted.vector,information.vector,main="weighted vs. information UniFrac")
 plot(unweighted.vector,weighted.vector,main="unweighted vs. weighted UniFrac")
-plot(exponent.vector,information.vector,main="normalized exponent vs. information UniFrac")
-plot(exponent.vector,weighted.vector,main="normalized exponent vs. weighted UniFrac")
+plot(ratio.vector,information.vector,main="normalized ratio vs. information UniFrac")
+plot(ratio.vector,weighted.vector,main="normalized ratio vs. weighted UniFrac")
 
 dev.off()
