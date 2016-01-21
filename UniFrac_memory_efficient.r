@@ -104,6 +104,70 @@ build_weights = function(root) {
   assign("weightsPerNode", weightsPerNode, envir = .GlobalEnv)
 }
 
+calculateDistanceMatrix <- function(weights, method, otuTable, verbose, pruneTree, normalize) {
+  unifrac.tree <- get("unifrac.tree",envir=.GlobalEnv)
+  otuPropsPerNode <- get("otuPropsPerNode",envir=.GlobalEnv)
+  
+  nSamples <- nrow(otuTable)
+  distanceMatrix <- matrix(NA,nrow=nSamples,ncol=nSamples)
+  rownames(distanceMatrix) <- rownames(otuTable)
+  colnames(distanceMatrix) <- rownames(otuTable)
+  
+  branchLengths <- unifrac.tree$edge.length
+  
+  weightColnames <- as.numeric(colnames(weights))
+  
+  weights <- weights[,match(unifrac.tree$edge[,2], weightColnames)]
+  
+	for (i in 1:nSamples) {
+		for (j in i:nSamples) {
+
+				if (method == "weighted" || method == "information" || method == "ratio" || method == "ratio_no_log") {
+					# the formula is sum of (proportional branch lengths * | proportional abundance for sample A - proportional abundance for sample B| )
+					if (pruneTree==TRUE){
+						includeBranchLengths <- which( (otuPropsPerNode[i,] > 0) | (otuPropsPerNode[j,] > 0) )
+						if (normalize==TRUE && (method != "ratio" || method != "ratio_no_log")) {
+							distance <- sum( branchLengths[includeBranchLengths] * abs(weights[i,includeBranchLengths] - weights[j,includeBranchLengths]) )/sum( branchLengths[includeBranchLengths]* (weights[i,includeBranchLengths] + weights[j,includeBranchLengths]) )
+						}
+						else {
+							distance <- sum( branchLengths[includeBranchLengths] * abs(weights[i,includeBranchLengths] - weights[j,includeBranchLengths]) )/sum( branchLengths[includeBranchLengths])
+						}
+					}
+					else {
+						distance <- sum( branchLengths * abs(weights[i,] - weights[j,]) )/sum(branchLengths)
+						if (normalize==TRUE) {
+							distance <- sum( branchLengths * abs(weights[i,] - weights[j,]) )/sum(branchLengths * (weights[i,] + weights[j,]))
+						}
+					}
+
+				}
+			else {
+				if (method!="unweighted") {
+					warning(paste("Invalid method",method,", using unweighted Unifrac instead"))
+				}
+				# the formula is sum of (branch lengths * (1 if one sample has counts and not the other, 0 otherwise) )
+				#	i call the (1 if one sample has counts and not the other, 0 otherwise) xorBranchLength
+				xorBranchLength <- as.numeric(xor( weights[i,] > 0, weights[j,] > 0))
+				if (pruneTree==TRUE) {
+					includeBranchLengths <- which( (weights[i,] > 0) | (weights[j,] > 0) )
+					distance <- sum( branchLengths[includeBranchLengths] *  xorBranchLength[includeBranchLengths])/sum(branchLengths[includeBranchLengths])
+				}
+				else {
+					distance <- sum( branchLengths *  xorBranchLength)/sum(branchLengths)
+				}
+
+			}
+			distanceMatrix[i,j] <- distance
+			distanceMatrix[j,i] <- distance
+
+		}
+	}
+
+	if(verbose) {	print("done")	}
+
+	return(distanceMatrix)
+
+}
 
 #valid methods are unweighted, weighted, information, and ratio. Any other method will result in a warning and the unweighted analysis
 #pruneTree option prunes the tree for each comparison to exclude branch lenxgths not present in both samples
@@ -194,78 +258,50 @@ getDistanceMatrix <- function(otuTable,tree,method="weighted",verbose=FALSE,prun
   otuPropsPerNode[,c(1:ncol(otuPropsPerNode))] <- abs(otuPropsPerNode[,c(1:ncol(otuPropsPerNode))])
   otuPropsPerNode.adjustedZeros[,c(1:ncol(otuPropsPerNode.adjustedZeros))] <- abs(otuPropsPerNode.adjustedZeros[,c(1:ncol(otuPropsPerNode.adjustedZeros))])
   
+  assign("otuPropsPerNode", otuPropsPerNode, envir = .GlobalEnv)
+  assign("otuPropsPerNode.adjustedZeros", otuPropsPerNode.adjustedZeros, envir = .GlobalEnv)
+  assign("weightsPerNode", weightsPerNode, envir = .GlobalEnv)
+  
   if(verbose) {	print("calculating pairwise distances...")	}
   
-  nSamples <- nrow(otuTable)
-  distanceMatrix <- matrix(NA,nrow=nSamples,ncol=nSamples)
-  rownames(distanceMatrix) <- rownames(otuTable)
-  colnames(distanceMatrix) <- rownames(otuTable)
-  
-  branchLengths <- tree$edge.length
-  
   #convert table according to weight
-  if (method=="information") {
+  if (method == "all") {
+    returnList <- list()
+    # unweighted
+    print("calculating unweighted distance matrix")
+    weights <- otuPropsPerNode
+    returnList[["unweighted"]] <- calculateDistanceMatrix(weights, "unweighted", otuTable, verbose, pruneTree, normalize)
+    # weighted
+    print("calculating weighted distance matrix")
+    weights <- otuPropsPerNode
+    returnList[["weighted"]] <- calculateDistanceMatrix(weights, "weighted", otuTable, verbose, pruneTree, normalize)
+    # information
+    print("calculating information distance matrix")
     weights <- otuPropsPerNode.adjustedZeros*log2(otuPropsPerNode.adjustedZeros)
+    returnList[["information"]] <- calculateDistanceMatrix(weights, "information", otuTable, verbose, pruneTree, normalize)
+    # ratio
+    print("calculating ratio distance matrix")
+    weights <- weightsPerNode
+    returnList[["ratio"]] <- calculateDistanceMatrix(weights, "ratio", otuTable, verbose, pruneTree, normalize)
+    # ratio no log
+    print("calculating no log ratio distance matrix")
+    weights <- weightsPerNode
+    weights <- 2^weights
+    returnList[["ratio_no_log"]] <- calculateDistanceMatrix(weights, "ratio_no_log", otuTable, verbose, pruneTree, normalize)
+    return(returnList)
+  } else if (method=="information") {
+    weights <- otuPropsPerNode.adjustedZeros*log2(otuPropsPerNode.adjustedZeros)
+    return(calculateDistanceMatrix(weights, method, otuTable, verbose, pruneTree, normalize))
   } else if (method == "ratio_no_log") {
     weights <- weightsPerNode
     weights <- 2^weights
+    return(calculateDistanceMatrix(weights, method, otuTable, verbose, pruneTree, normalize))
   } else if (method == "ratio") {
     weights <- weightsPerNode
+    return(calculateDistanceMatrix(weights, method, otuTable, verbose, pruneTree, normalize))
   }
   else {
     weights <- otuPropsPerNode
+    return(calculateDistanceMatrix(weights, method, otuTable, verbose, pruneTree, normalize))
   }
-  
-  weightColnames <- as.numeric(colnames(weights))
-  
-  weights <- weights[,match(tree$edge[,2], weightColnames)]
-  
-	for (i in 1:nSamples) {
-		for (j in i:nSamples) {
-
-				if (method == "weighted" || method == "information" || method == "ratio" || method == "ratio_no_log") {
-					# the formula is sum of (proportional branch lengths * | proportional abundance for sample A - proportional abundance for sample B| )
-					if (pruneTree==TRUE){
-						includeBranchLengths <- which( (otuPropsPerNode[i,] > 0) | (otuPropsPerNode[j,] > 0) )
-						if (normalize==TRUE && (method != "ratio" || method != "ratio_no_log")) {
-							distance <- sum( branchLengths[includeBranchLengths] * abs(weights[i,includeBranchLengths] - weights[j,includeBranchLengths]) )/sum( branchLengths[includeBranchLengths]* (weights[i,includeBranchLengths] + weights[j,includeBranchLengths]) )
-						}
-						else {
-							distance <- sum( branchLengths[includeBranchLengths] * abs(weights[i,includeBranchLengths] - weights[j,includeBranchLengths]) )/sum( branchLengths[includeBranchLengths])
-						}
-					}
-					else {
-						distance <- sum( branchLengths * abs(weights[i,] - weights[j,]) )/sum(branchLengths)
-						if (normalize==TRUE) {
-							distance <- sum( branchLengths * abs(weights[i,] - weights[j,]) )/sum(branchLengths * (weights[i,] + weights[j,]))
-						}
-					}
-
-				}
-			else {
-				if (method!="unweighted") {
-					warning(paste("Invalid method",method,", using unweighted Unifrac instead"))
-				}
-				# the formula is sum of (branch lengths * (1 if one sample has counts and not the other, 0 otherwise) )
-				#	i call the (1 if one sample has counts and not the other, 0 otherwise) xorBranchLength
-				xorBranchLength <- as.numeric(xor( weights[i,] > 0, weights[j,] > 0))
-				if (pruneTree==TRUE) {
-					includeBranchLengths <- which( (weights[i,] > 0) | (weights[j,] > 0) )
-					distance <- sum( branchLengths[includeBranchLengths] *  xorBranchLength[includeBranchLengths])/sum(branchLengths[includeBranchLengths])
-				}
-				else {
-					distance <- sum( branchLengths *  xorBranchLength)/sum(branchLengths)
-				}
-
-			}
-			distanceMatrix[i,j] <- distance
-			distanceMatrix[j,i] <- distance
-
-		}
-	}
-
-	if(verbose) {	print("done")	}
-
-	return(distanceMatrix)
-
 }
