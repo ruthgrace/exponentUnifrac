@@ -3,21 +3,16 @@ options(error=recover)
 
 #this script prints out PDF pcoa plots and distance matrices, given an OTU table, phylogenetic tree, and metadata
 
-source("UniFrac.r")
+# source("UniFrac.r")
+source("UniFrac_memory_efficient.r")
 library(ape)
 library(phangorn)
 library(vegan)
 
-otu.tab <- read.table("data/nash_data/td_OTU_tag_mapped_lineage.txt", header=T, sep="\t", row.names=1, comment.char="", check.names=FALSE)
-
-#remove taxonomy column to make otu count matrix numeric
-taxonomy <- otu.tab$taxonomy
-otu.tab <- otu.tab[-length(colnames(otu.tab))]
-otu.tab <- t(as.matrix(otu.tab))
+otu.tab <- read.table("data/nash_data/summed_data_gg.txt", header=T, sep="\t", row.names=1, comment.char="", check.names=FALSE)
 
 #sort taxa from most to least abundant
 taxaOrder <- rev(order(apply(otu.tab,2,sum)))
-taxonomy <- taxonomy[taxaOrder]
 otu.tab <- otu.tab[,taxaOrder]
 
 # read and root tree (rooted tree is required)
@@ -26,15 +21,22 @@ tree <- midpoint(tree)
 
 # read metadata
 MyMeta<- read.table("data/nash_data/metadata.txt", header=T, sep="\t", row.names=1, comment.char="", check.names=FALSE)
+metadata <- MyMeta[grepl("a$",rownames(MyMeta)),]
+rownames(metadata) <- gsub("a$","",rownames(metadata))
 
-# filter OTU table and metadata so that only samples which appear in both are retained
-otu_indicies <- match(rownames(MyMeta),rownames(otu.tab))
-otu_indicies <- otu_indicies[!is.na(otu_indicies)]
-otu.tab <- otu.tab[otu_indicies,]
-MyMetaOrdered <- MyMeta[match(rownames(otu.tab),rownames(MyMeta)),]
+## sanity check to make sure all your counts have metadata
+# which(!(colnames(otu.tab) %in% rownames(metadata)))
 
 #rarefy data for unweighted unifrac
 otu.tab.rarefy <- rrarefy(otu.tab, min(apply(otu.tab,1,sum)))
+
+## input parameters for unweighted unifrac
+otuTable <- otu.tab.rarefy
+tree.original <- tree
+method="unweighted"
+verbose=TRUE
+pruneTree=FALSE
+normalize=TRUE
 
 #calculate distance matrix
 unweighted <- getDistanceMatrix(otu.tab.rarefy,tree,method="unweighted",verbose=TRUE)

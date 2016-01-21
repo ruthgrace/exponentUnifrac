@@ -3,7 +3,7 @@ options(error=recover)
 
 #this script prints out PDF pcoa plots and distance matrices, given an OTU table, phylogenetic tree, and metadata
 
-source("UniFrac.r")
+source("UniFrac_memory_efficient.r")
 library(ape)
 library(phangorn)
 library(vegan)

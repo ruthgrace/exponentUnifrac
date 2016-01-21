@@ -56,10 +56,8 @@ getDistanceMatrix <- function(otuTable,tree,method="weighted",verbose=FALSE,prun
 	if(verbose) {	print("calculated proportional abundance")	}
 
 	# add priors to zeros based on bayesian approach
-	#otuTable.adjustedZeros <- cmultRepl(otuTable, method="CZM", output="counts")
-	otuTable.adjustedZeros <- otuTable
-	otuTable.adjustedZeros[which(otuTable==0)] <- 0.5
-	# calculate geometric mean & geometric sum for exponent weighted UniFrac
+	otuTable.adjustedZeros <- cmultRepl(otuTable, method="CZM", output="counts")
+	# calculate geometric mean & geometric sum for ratio weighted UniFrac
 	geometric_mean <- apply(otuTable.adjustedZeros, 1, gm_mean)
 	geometric_sum <- apply(otuTable.adjustedZeros, 1, sum) / geometric_mean
 	if(verbose) {	print("calculated geometric mean per sample")	}
@@ -122,7 +120,6 @@ getDistanceMatrix <- function(otuTable,tree,method="weighted",verbose=FALSE,prun
     geometric_means[,parentNode] <- gm_vector(absolute_weights[,parentNode],otuCountsPerNode[,parentNode,],geometric_mean)
 	}
 
-
 	if(verbose) {	print("done calculating weights")	}
 
 	if (method=="information") {
@@ -133,18 +130,18 @@ getDistanceMatrix <- function(otuTable,tree,method="weighted",verbose=FALSE,prun
 		weights[which(is.na(weights))] <- 0
 	}
 
-	if (method=="exponent") {
-		if(verbose) {	print("output CLR exponent weights vs. proportional weights graph in exponent_vs_proportional_weights.pdf")	}
-    weight.vector <- unlist(weights)
-    exponent.vector <- unlist((absolute_weights[] / geometric_means[]))
-    pdf("exponent_vs_proportional_weights.pdf")
-    plot(weight.vector, exponent.vector, main = "Exponent vs. Proportion UniFrac Weights", xlab="Proportions", ylab="Exponent UniFrac weights",pch=19,col=rgb(0.5,0,0.5,0.1))
-    dev.off()
+	if (method=="ratio") {
+		if(verbose) {	print("CLR exponent transform")	}
+		weights[] <- log2(absolute_weights[] / geometric_means[])
+		weights <- as.matrix(weights)
+		weights[which(is.na(weights))] <- 0
+	}
+  else if (method == "ratio_no_log") {
 		if(verbose) {	print("CLR exponent transform")	}
 		weights[] <- (absolute_weights[] / geometric_means[])
 		weights <- as.matrix(weights)
 		weights[which(is.na(weights))] <- 0
-	}
+  }
 
 	nSamples <- length(rownames(otuTable))
 	distanceMatrix <- data.frame(matrix(ncol=nSamples,nrow=nSamples))
@@ -161,11 +158,11 @@ getDistanceMatrix <- function(otuTable,tree,method="weighted",verbose=FALSE,prun
 	for (i in 1:nSamples) {
 		for (j in i:nSamples) {
 
-				if (method=="weighted" || method=="information" || method=="exponent") {
+				if (method=="weighted" || method=="information" || method=="ratio" || method == "ratio_no_log") {
 					# the formula is sum of (proportional branch lengths * | proportional abundance for sample A - proportional abundance for sample B| )
 					if (pruneTree==TRUE){
 						includeBranchLengths <- which( (weights[i,] > 0) | (weights[j,] > 0) )
-						if (normalize==TRUE && method!="exponent") {
+						if (normalize==TRUE && method!="ratio" && method != "ratio_no_log") {
 							distance <- sum( branchLengths[includeBranchLengths] * abs(weights[i,includeBranchLengths] - weights[j,includeBranchLengths]) )/sum( branchLengths[includeBranchLengths]* (weights[i,includeBranchLengths] + weights[j,includeBranchLengths]) )
 						}
 						else {
@@ -178,7 +175,6 @@ getDistanceMatrix <- function(otuTable,tree,method="weighted",verbose=FALSE,prun
 							distance <- sum( branchLengths * abs(weights[i,] - weights[j,]) )/sum(branchLengths * (weights[i,] + weights[j,]))
 						}
 					}
-
 				}
 			else {
 				if (method!="unweighted") {

@@ -10,7 +10,7 @@ library(vegan)
 # get default par
 plotParameters <- par()
 
-source("UniFrac_original.r")
+source("UniFrac_memory_efficient.r")
 
 # read OTU table and format appropriately for input into UniFrac methods
 breastmilk.otu.tab <- read.table("./data/camilla_data/td_OTU_tag_mapped_lineage.txt", header=T, sep="\t", row.names=1, comment.char="", check.names=FALSE)
@@ -41,6 +41,13 @@ otu_indicies <- match(rownames(MyMeta),rownames(breastmilk.otu.tab))
 otu_indicies <- otu_indicies[!is.na(otu_indicies)]
 breastmilk.otu.tab <- breastmilk.otu.tab[otu_indicies,]
 MyMetaOrdered <- MyMeta[match(rownames(breastmilk.otu.tab),rownames(MyMeta)),]
+
+otuTable <- breastmilk.otu.tab
+tree <- breastmilk.tree
+method = "exponent"
+verbose = TRUE
+pruneTree = FALSE
+normalize = TRUE
 
 unweighted <- getDistanceMatrix(breastmilk.otu.tab.rarefy,breastmilk.tree,method="unweighted",verbose=TRUE)
 weighted <- getDistanceMatrix(breastmilk.otu.tab,breastmilk.tree,method="weighted",verbose=TRUE)
@@ -111,7 +118,7 @@ exponent.pc1.varEx <- sd(exponent.pcoa$vector[,1])*sd(exponent.pcoa$vector[,1])/
 exponent.pc2.varEx <- sd(exponent.pcoa$vector[,2])*sd(exponent.pcoa$vector[,2])/exponent.varExplained
 
 #save plots as PDF
-pdf("breastmilk_output/original_unifrac_breastmilk_pcoa_plots_infected.pdf")
+pdf("efficient_unifrac_breastmilk_pcoa_plots_infected.pdf")
 
 
 # # MAKE BAR PLOTS
