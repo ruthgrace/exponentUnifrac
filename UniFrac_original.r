@@ -98,7 +98,7 @@ getDistanceMatrix <- function(otuTable,tree,method="weighted",verbose=FALSE,prun
 			otuName <- tree$tip.label[childNode]
 			otuIndex <- which(colnames(otu.prop) == otuName)[1]
 			weights[,childNode] <- otu.prop[,otuIndex]
-			absolute_weights[,childNode] <- otuTable[,otuIndex]
+			absolute_weights[,childNode] <- otuTable.adjustedZeros[,otuIndex]
       # MAKE CHILD ZERO IN OTU COUNTS
       otuCountsPerNode[,childNode,] <- as.matrix(otuTable.adjustedZeros)
       otuCountsPerNode[,childNode,otuIndex] <- -1
@@ -170,7 +170,7 @@ getDistanceMatrix <- function(otuTable,tree,method="weighted",verbose=FALSE,prun
 						}
 					}
 					else {
-						distance <- sum( branchLengths * abs(weights[i,] - weights[j,]) )/sum(branchLengths)
+            distance <- sum( branchLengths * abs(weights[i,] - weights[j,]) )/sum(branchLengths)
 						if (normalize==TRUE) {
 							distance <- sum( branchLengths * abs(weights[i,] - weights[j,]) )/sum(branchLengths * (weights[i,] + weights[j,]))
 						}
