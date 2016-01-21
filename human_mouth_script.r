@@ -32,17 +32,19 @@ MyMetaOrdered <- gsub("_.*$","",MyMetaOrdered)
 #rarefy data for unweighted unifrac
 otu.tab.rarefy <- rrarefy(otu.tab, min(apply(otu.tab,1,sum)))
 
+all_distance_matrices <- getDistanceMatrix(otu.tab,tree,method="all",verbose=TRUE)
+
 #calculate distance matrix
-unweighted <- getDistanceMatrix(otu.tab.rarefy,tree,method="unweighted",verbose=TRUE)
+unweighted <- all_distance_matrices[["unweighted"]]
 #output distance matrices
 write.table(unweighted,file="human_mouth_output/unweighted_distance_matrix.txt",sep="\t",quote=FALSE)
-weighted <- getDistanceMatrix(otu.tab,tree,method="weighted",verbose=TRUE)
+weighted <- all_distance_matrices[["weighted"]]
 write.table(weighted,file="human_mouth_output/weighted_distance_matrix.txt",sep="\t",quote=FALSE)
-information <- getDistanceMatrix(otu.tab,tree,method="information",verbose=TRUE)
+information <- all_distance_matrices[["information"]]
 write.table(information,file="human_mouth_output/information_distance_matrix.txt",sep="\t",quote=FALSE)
-ratio <- getDistanceMatrix(otu.tab,tree,method="ratio",verbose=TRUE)
+ratio <- all_distance_matrices[["ratio"]]
 write.table(ratio,file="human_mouth_output/ratio_normalize_distance_matrix.txt",sep="\t",quote=FALSE)
-ratio_no_log <- getDistanceMatrix(otu.tab,tree,method="ratio_no_log",verbose=TRUE)
+ratio_no_log <- all_distance_matrices[["ratio_no_log"]]
 write.table(ratio_no_log,file="human_mouth_output/ratio_no_log_normalize_distance_matrix.txt",sep="\t",quote=FALSE)
 
 #conditions (bv - bacterial vaginosis as scored by nugent/amsel, i - intermediate, n - normal/healthy)

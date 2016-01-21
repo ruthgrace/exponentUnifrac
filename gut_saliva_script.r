@@ -35,16 +35,19 @@ plot_all_gut_saliva_unifrac <- function(count_file, tree_file, output_file) {
 	otu.tab.rarefy <- rrarefy(otu.tab, min(apply(otu.tab,1,sum)))
 	otu.tab.rarefy <- data.matrix(otu.tab.rarefy)
 	#calculate distance matrix
-	unweighted <- getDistanceMatrix(otu.tab.rarefy,tree,method="unweighted",verbose=TRUE)
+	
+	all_distance_matrices <- getDistanceMatrix(otu.tab,tree,method="all",verbose=TRUE)
+	
+	unweighted <- all_distance_matrices[["unweighted"]]
 	#output distance matrices
 	write.table(unweighted,file="unweighted_distance_matrix.txt",sep="\t",quote=FALSE)
-	weighted <- getDistanceMatrix(otu.tab,tree,method="weighted",verbose=TRUE)
+	weighted <- all_distance_matrices[["weighted"]]
 	write.table(weighted,file="weighted_distance_matrix.txt",sep="\t",quote=FALSE)
-	information <- getDistanceMatrix(otu.tab,tree,method="information",verbose=TRUE)
+	information <- all_distance_matrices[["information"]]
 	write.table(information,file="information_distance_matrix.txt",sep="\t",quote=FALSE)
-	ratio <- getDistanceMatrix(otu.tab,tree,method="ratio",verbose=TRUE)
+	ratio <- all_distance_matrices[["ratio"]]
 	write.table(ratio,file="ratio_normalize_distance_matrix.txt",sep="\t",quote=FALSE)
-	ratio_no_log <- getDistanceMatrix(otu.tab,tree,method="ratio_no_log",verbose=TRUE)
+	ratio_no_log <- all_distance_matrices[["ratio_no_log"]]
 	write.table(ratio_no_log,file="ratio_no_log_normalize_distance_matrix.txt",sep="\t",quote=FALSE)
 
 	#conditions (bv - bacterial vaginosis as scored by nugent/amsel, i - intermediate, n - normal/healthy)
