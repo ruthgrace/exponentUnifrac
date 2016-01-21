@@ -44,6 +44,8 @@ plot_all_gut_saliva_unifrac <- function(count_file, tree_file, output_file) {
 	write.table(information,file="information_distance_matrix.txt",sep="\t",quote=FALSE)
 	ratio <- getDistanceMatrix(otu.tab,tree,method="ratio",verbose=TRUE)
 	write.table(ratio,file="ratio_normalize_distance_matrix.txt",sep="\t",quote=FALSE)
+	ratio_no_log <- getDistanceMatrix(otu.tab,tree,method="ratio_no_log",verbose=TRUE)
+	write.table(ratio_no_log,file="ratio_no_log_normalize_distance_matrix.txt",sep="\t",quote=FALSE)
 
 	#conditions (bv - bacterial vaginosis as scored by nugent/amsel, i - intermediate, n - normal/healthy)
 	groups <- MyMetaOrdered$SSvsNASH
@@ -89,17 +91,20 @@ plot_all_gut_saliva_unifrac <- function(count_file, tree_file, output_file) {
 	weighted.pcoa <- pcoa(weighted)
 	information.pcoa <- pcoa(information)
 	ratio.pcoa <- pcoa(ratio)
+	ratio_no_log.pcoa <- pcoa(ratio_no_log)
 
 	unweighted.varEx <- getVarExplained(unweighted.pcoa$vectors)
 	weighted.varEx <- getVarExplained(weighted.pcoa$vectors)
 	information.varEx <- getVarExplained(information.pcoa$vectors)
 	ratio.varEx <- getVarExplained(ratio.pcoa$vectors)
+	ratio_no_log.varEx <- getVarExplained(ratio_no_log.pcoa$vectors)
 
 	#get vector version of distance matrices for correlation plots below
 	unweighted.vector <- unlist(unweighted[lower.tri(unweighted,diag=TRUE)])
 	weighted.vector <- unlist(weighted[lower.tri(weighted,diag=TRUE)])
 	information.vector <- unlist(information[lower.tri(information,diag=TRUE)])
 	ratio.vector <- unlist(ratio[lower.tri(ratio,diag=TRUE)])
+	ratio_no_log.vector <- unlist(ratio_no_log[lower.tri(ratio_no_log,diag=TRUE)])
 
 
 
@@ -111,6 +116,7 @@ plot_all_gut_saliva_unifrac <- function(count_file, tree_file, output_file) {
 	legend(-0.37,-0.05,c("Healthy","SS","NASH"),col=palette(),pch=19)
 	plot(information.pcoa$vectors[,1],information.pcoa$vectors[,2], col=groups,main="Information UniFrac\nprincipal coordinates analysis",xlab=paste("First Component", round(information.varEx[1],digits=3),"variance explained"),ylab=paste("Second Component", round(information.varEx[2],digits=3),"variance explained"),pch=19,cex.lab=1.4,cex.main=2)
 	plot(ratio.pcoa$vectors[,1],ratio.pcoa$vectors[,2], col=groups,main="ratio Normalized UniFrac\nprincipal coordinates analysis",xlab=paste("First Component", round(ratio.varEx[1],digits=3),"variance explained"),ylab=paste("Second Component", round(ratio.varEx[2],digits=3),"variance explained"),pch=19,cex.lab=1.4,cex.main=2)
+	plot(ratio_no_log.pcoa$vectors[,1],ratio_no_log.pcoa$vectors[,2], col=groups,main="ratio no log Normalized UniFrac\nprincipal coordinates analysis",xlab=paste("First Component", round(ratio_no_log.varEx[1],digits=3),"variance explained"),ylab=paste("Second Component", round(ratio_no_log.varEx[2],digits=3),"variance explained"),pch=19,cex.lab=1.4,cex.main=2)
 
 	#plot correlation between different UniFrac modes
 	plot(unweighted.vector,information.vector,main="unweighted vs. information UniFrac")
@@ -118,6 +124,7 @@ plot_all_gut_saliva_unifrac <- function(count_file, tree_file, output_file) {
 	plot(unweighted.vector,weighted.vector,main="unweighted vs. weighted UniFrac")
 	plot(ratio.vector,information.vector,main="normalized ratio vs. information UniFrac")
 	plot(ratio.vector,weighted.vector,main="normalized ratio vs. weighted UniFrac")
+	plot(ratio_no_log.vector,weighted.vector,main="normalized no log ratio vs. weighted UniFrac")
 
 	dev.off()
 }
