@@ -53,6 +53,7 @@ unweighted <- getDistanceMatrix(breastmilk.otu.tab.rarefy,breastmilk.tree,method
 weighted <- getDistanceMatrix(breastmilk.otu.tab,breastmilk.tree,method="weighted",verbose=TRUE)
 information <- getDistanceMatrix(breastmilk.otu.tab,breastmilk.tree,method="information",verbose=TRUE)
 ratio <- getDistanceMatrix(breastmilk.otu.tab,breastmilk.tree,method="ratio",verbose=TRUE)
+ratio_no_log <- getDistanceMatrix(breastmilk.otu.tab,breastmilk.tree,method="ratio_no_log",verbose=TRUE)
 
 groups <- rep("Not Infected",length(MyMetaOrdered$Gestation))
 groups[which(rownames(MyMetaOrdered)=="S38I")] <- "Infected"
@@ -96,12 +97,14 @@ unweighted.pcoa <- pcoa(unweighted)
 weighted.pcoa <- pcoa(weighted)
 information.pcoa <- pcoa(information)
 ratio.pcoa <- pcoa(ratio)
+ratio_no_log.pcoa <- pcoa(ratio_no_log)
 
 # calculate total variance explained
 unweighted.varExplained <- sum(apply(unweighted.pcoa$vector,2,function(x) sd(x)*sd(x)))
 weighted.varExplained <- sum(apply(weighted.pcoa$vector,2,function(x) sd(x)*sd(x)))
 information.varExplained <- sum(apply(information.pcoa$vector,2,function(x) sd(x)*sd(x)))
 ratio.varExplained <- sum(apply(ratio.pcoa$vector,2,function(x) sd(x)*sd(x)))
+ratio_no_log.varExplained <- sum(apply(ratio_no_log.pcoa$vector,2,function(x) sd(x)*sd(x)))
 
 # calculate proportion of variance explained by first component
 unweighted.pc1.varEx <- sd(unweighted.pcoa$vector[,1])*sd(unweighted.pcoa$vector[,1])/unweighted.varExplained
@@ -116,6 +119,9 @@ information.pc2.varEx <- sd(information.pcoa$vector[,2])*sd(information.pcoa$vec
 
 ratio.pc1.varEx <- sd(ratio.pcoa$vector[,1])*sd(ratio.pcoa$vector[,1])/ratio.varExplained
 ratio.pc2.varEx <- sd(ratio.pcoa$vector[,2])*sd(ratio.pcoa$vector[,2])/ratio.varExplained
+
+ratio_no_log.pc1.varEx <- sd(ratio_no_log.pcoa$vector[,1])*sd(ratio_no_log.pcoa$vector[,1])/ratio_no_log.varExplained
+ratio_no_log.pc2.varEx <- sd(ratio_no_log.pcoa$vector[,2])*sd(ratio_no_log.pcoa$vector[,2])/ratio_no_log.varExplained
 
 #save plots as PDF
 pdf("breastmilk_output/original_unifrac_breastmilk_pcoa_plots_infected.pdf")
@@ -183,6 +189,8 @@ plot(information.pcoa$vectors[,1],information.pcoa$vectors[,2], col=groups,main=
 # legend(0.4,-0.15,levels(groups),col=palette(),pch=19)
 
 plot(ratio.pcoa$vectors[,1],ratio.pcoa$vectors[,2], col=groups,main="ratio UniFrac\nprincipal coordinate analysis",xlab=paste("First Component", round(ratio.pc1.varEx,digits=3),"variance explained"),ylab=paste("Second Component", round(ratio.pc2.varEx,digits=3),"variance explained"),pch=19,cex.lab=1.4,cex.main=2)
+
+plot(ratio_no_log.pcoa$vectors[,1],ratio_no_log.pcoa$vectors[,2], col=groups,main="no log ratio UniFrac\nprincipal coordinate analysis",xlab=paste("First Component", round(ratio_no_log.pc1.varEx,digits=3),"variance explained"),ylab=paste("Second Component", round(ratio_no_log.pc2.varEx,digits=3),"variance explained"),pch=19,cex.lab=1.4,cex.main=2)
 
 # # BIPLOT
 # 
