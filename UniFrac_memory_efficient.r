@@ -105,7 +105,7 @@ build_weights = function(root) {
 }
 
 
-#valid methods are unweighted, weighted, information. Any other method will result in a warning and the unweighted analysis
+#valid methods are unweighted, weighted, information, and ratio. Any other method will result in a warning and the unweighted analysis
 #pruneTree option prunes the tree for each comparison to exclude branch lenxgths not present in both samples
 #normalize divides the value at each node by sum of weights to guarantee output between 0 and 1 (breaks the triangle inequality)
 
@@ -206,10 +206,13 @@ getDistanceMatrix <- function(otuTable,tree,method="weighted",verbose=FALSE,prun
   #convert table according to weight
   if (method=="information") {
     weights <- otuPropsPerNode.adjustedZeros*log2(otuPropsPerNode.adjustedZeros)
-  } else if (method=="exponent") {
+  } else if (method == "ratio") {
     weights <- weightsPerNode
     weights <- 2^weights
-  } else {
+  } else if (method == "ratio_no_log") {
+    weights <- weightsPerNode
+  }
+  else {
     weights <- otuPropsPerNode
   }
   
@@ -220,11 +223,11 @@ getDistanceMatrix <- function(otuTable,tree,method="weighted",verbose=FALSE,prun
 	for (i in 1:nSamples) {
 		for (j in i:nSamples) {
 
-				if (method=="weighted" || method=="information" || method=="exponent") {
+				if (method == "weighted" || method == "information" || method == "ratio" || method == "ratio_no_log") {
 					# the formula is sum of (proportional branch lengths * | proportional abundance for sample A - proportional abundance for sample B| )
 					if (pruneTree==TRUE){
 						includeBranchLengths <- which( (otuPropsPerNode[i,] > 0) | (otuPropsPerNode[j,] > 0) )
-						if (normalize==TRUE && method!="exponent") {
+						if (normalize==TRUE && (method != "ratio" || method != "ratio_no_log")) {
 							distance <- sum( branchLengths[includeBranchLengths] * abs(weights[i,includeBranchLengths] - weights[j,includeBranchLengths]) )/sum( branchLengths[includeBranchLengths]* (weights[i,includeBranchLengths] + weights[j,includeBranchLengths]) )
 						}
 						else {

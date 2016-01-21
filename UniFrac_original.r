@@ -57,7 +57,7 @@ getDistanceMatrix <- function(otuTable,tree,method="weighted",verbose=FALSE,prun
 
 	# add priors to zeros based on bayesian approach
 	otuTable.adjustedZeros <- cmultRepl(otuTable, method="CZM", output="counts")
-	# calculate geometric mean & geometric sum for exponent weighted UniFrac
+	# calculate geometric mean & geometric sum for ratio weighted UniFrac
 	geometric_mean <- apply(otuTable.adjustedZeros, 1, gm_mean)
 	geometric_sum <- apply(otuTable.adjustedZeros, 1, sum) / geometric_mean
 	if(verbose) {	print("calculated geometric mean per sample")	}
@@ -130,12 +130,18 @@ getDistanceMatrix <- function(otuTable,tree,method="weighted",verbose=FALSE,prun
 		weights[which(is.na(weights))] <- 0
 	}
 
-	if (method=="exponent") {
+	if (method=="ratio") {
+		if(verbose) {	print("CLR exponent transform")	}
+		weights[] <- log2(absolute_weights[] / geometric_means[])
+		weights <- as.matrix(weights)
+		weights[which(is.na(weights))] <- 0
+	}
+  else if (method == "ratio_no_log") {
 		if(verbose) {	print("CLR exponent transform")	}
 		weights[] <- (absolute_weights[] / geometric_means[])
 		weights <- as.matrix(weights)
 		weights[which(is.na(weights))] <- 0
-	}
+  }
 
 	nSamples <- length(rownames(otuTable))
 	distanceMatrix <- data.frame(matrix(ncol=nSamples,nrow=nSamples))
@@ -152,11 +158,11 @@ getDistanceMatrix <- function(otuTable,tree,method="weighted",verbose=FALSE,prun
 	for (i in 1:nSamples) {
 		for (j in i:nSamples) {
 
-				if (method=="weighted" || method=="information" || method=="exponent") {
+				if (method=="weighted" || method=="information" || method=="ratio" || method == "ratio_no_log") {
 					# the formula is sum of (proportional branch lengths * | proportional abundance for sample A - proportional abundance for sample B| )
 					if (pruneTree==TRUE){
 						includeBranchLengths <- which( (weights[i,] > 0) | (weights[j,] > 0) )
-						if (normalize==TRUE && method!="exponent") {
+						if (normalize==TRUE && method!="ratio" && method != "ratio_no_log") {
 							distance <- sum( branchLengths[includeBranchLengths] * abs(weights[i,includeBranchLengths] - weights[j,includeBranchLengths]) )/sum( branchLengths[includeBranchLengths]* (weights[i,includeBranchLengths] + weights[j,includeBranchLengths]) )
 						}
 						else {
