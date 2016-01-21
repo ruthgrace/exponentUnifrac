@@ -24,7 +24,7 @@ gm_vector = function(node_count, other_counts, geometric_mean) {
   return(gm_vec)
 }
 
-#valid methods are unweighted, weighted, information. Any other method will result in a warning and the unweighted analysis
+#valid methods are unweighted, weighted, information, and ratio. Any other method will result in a warning and the unweighted analysis
 #pruneTree option prunes the tree for each comparison to exclude branch lengths not present in both samples
 #normalize divides the value at each node by sum of weights to guarantee output between 0 and 1 (breaks the triangle inequality)
 
