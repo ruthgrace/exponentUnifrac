@@ -47,6 +47,12 @@ write.table(ratio,file="human_mouth_output/ratio_normalize_distance_matrix.txt",
 ratio_no_log <- all_distance_matrices[["ratio_no_log"]]
 write.table(ratio_no_log,file="human_mouth_output/ratio_no_log_normalize_distance_matrix.txt",sep="\t",quote=FALSE)
 
+# unweighted <- read.table("human_mouth_output/unweighted_distance_matrix.txt",sep="\t",quote="",header=TRUE,row.names=1)
+# weighted <- read.table("human_mouth_output/weighted_distance_matrix.txt",sep="\t",quote="",header=TRUE,row.names=1)
+# information <- read.table("human_mouth_output/information_distance_matrix.txt",sep="\t",quote="",header=TRUE,row.names=1)
+# ratio <- read.table("human_mouth_output/ratio_normalize_distance_matrix.txt",sep="\t",quote="",header=TRUE,row.names=1)
+# ratio_no_log <- read.table("human_mouth_output/ratio_no_log_normalize_distance_matrix.txt",sep="\t",quote="",header=TRUE,row.names=1)
+
 #conditions (bv - bacterial vaginosis as scored by nugent/amsel, i - intermediate, n - normal/healthy)
 groups <- MyMetaOrdered
 originalgroups <- groups
@@ -114,11 +120,15 @@ pdf("human_mouth_output/pcoa_plots.pdf")
 
 #plot pcoa plots
 plot(unweighted.pcoa$vectors[,1],unweighted.pcoa$vectors[,2], col=groups,main="Unweighted UniFrac\nprincipal coordinates analysis",xlab=paste("First Component", round(unweighted.varEx[1],digits=3),"variance explained"),ylab=paste("Second Component", round(unweighted.varEx[2],digits=3),"variance explained"),pch=19,cex.lab=1.4,cex.main=2)
+legend(-0.055,-0.12,levels(taxonomyGroups),col=palette(),pch=19)
 plot(weighted.pcoa$vectors[,1],weighted.pcoa$vectors[,2], col=groups,main="Weighted UniFrac\nprincipal coordinates analysis",xlab=paste("First Component", round(weighted.varEx[1],digits=3),"variance explained"),ylab=paste("Second Component", round(weighted.varEx[2],digits=3),"variance explained"),pch=19,cex.lab=1.4,cex.main=2)
-legend(0.2,0.32,levels(taxonomyGroups),col=palette(),pch=19)
+legend(-0.34,-0.13,levels(taxonomyGroups),col=palette(),pch=19)
 plot(information.pcoa$vectors[,1],information.pcoa$vectors[,2], col=groups,main="Information UniFrac\nprincipal coordinates analysis",xlab=paste("First Component", round(information.varEx[1],digits=3),"variance explained"),ylab=paste("Second Component", round(information.varEx[2],digits=3),"variance explained"),pch=19,cex.lab=1.4,cex.main=2)
+legend(0.18,-0.115,levels(taxonomyGroups),col=palette(),pch=19)
 plot(ratio.pcoa$vectors[,1],ratio.pcoa$vectors[,2], col=groups,main="ratio Normalized UniFrac\nprincipal coordinates analysis",xlab=paste("First Component", round(ratio.varEx[1],digits=3),"variance explained"),ylab=paste("Second Component", round(ratio.varEx[2],digits=3),"variance explained"),pch=19,cex.lab=1.4,cex.main=2)
+legend(0.08,-0.35,levels(taxonomyGroups),col=palette(),pch=19)
 plot(ratio_no_log.pcoa$vectors[,1],ratio_no_log.pcoa$vectors[,2], col=groups,main="ratio no log Normalized UniFrac\nprincipal coordinates analysis",xlab=paste("First Component", round(ratio_no_log.varEx[1],digits=3),"variance explained"),ylab=paste("Second Component", round(ratio_no_log.varEx[2],digits=3),"variance explained"),pch=19,cex.lab=1.4,cex.main=2)
+legend(-0.33,0,levels(taxonomyGroups),col=palette(),pch=19)
 
 #plot correlation between different UniFrac modes
 plot(unweighted.vector,information.vector,main="unweighted vs. information UniFrac")
