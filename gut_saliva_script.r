@@ -137,9 +137,9 @@ plot_all_gut_saliva_unifrac <- function(count_file, tree_file, output_folder) {
 }
 
 ## for testing/debugging purposes
-count_file <- "data/gut_saliva_data/low_sequencing_depth_hmp_data.txt"
-tree_file <- "data/gut_saliva_data/low_sequencing_depth_subtree.tre"
-output_folder <- "gut_saliva_output/low_sequencing_depth/less_than_3000_readcounts_"
+# count_file <- "data/gut_saliva_data/low_sequencing_depth_hmp_data.txt"
+# tree_file <- "data/gut_saliva_data/low_sequencing_depth_subtree.tre"
+# output_folder <- "gut_saliva_output/low_sequencing_depth/less_than_3000_readcounts_"
 
 plot_all_gut_saliva_unifrac("data/gut_saliva_data/low_sequencing_depth_hmp_data.txt", "data/gut_saliva_data/low_sequencing_depth_subtree.tre","gut_saliva_output/low_sequencing_depth/less_than_3000_readcounts_")
 plot_all_gut_saliva_unifrac("data/gut_saliva_data/med_sequencing_depth_hmp_data.txt", "data/gut_saliva_data/med_sequencing_depth_subtree.tre","gut_saliva_output/low_sequencing_depth/3000_to_6000_readcounts_")
