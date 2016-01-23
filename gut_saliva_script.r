@@ -113,6 +113,7 @@ plot_all_gut_saliva_unifrac <- function(count_file, tree_file, output_folder) {
 	pdf(paste(output_folder,"pcoa_plots.pdf",sep=""))
 	# par(mar=c(3,3,3,2.1), oma=c(1,0,0,5))
 	par(oma=c(1,1,1,5),mar=(c(5, 4, 4, 2) + 0.1))
+
 	#plot pcoa plots
 	plot(unweighted.pcoa$vectors[,1],unweighted.pcoa$vectors[,2], col=groups,main="Unweighted UniFrac\nprincipal coordinates analysis",xlab=paste("First Component", round(unweighted.varEx[1],digits=3),"variance explained"),ylab=paste("Second Component", round(unweighted.varEx[2],digits=3),"variance explained"),pch=19,cex.lab=1.4,cex.main=2)
 	legend("right", levels(groups), pch=c(19,19), col=palette()[c(1:2)], xpd=NA, inset=c(-0.25,0))
@@ -137,9 +138,9 @@ plot_all_gut_saliva_unifrac <- function(count_file, tree_file, output_folder) {
 }
 
 ## for testing/debugging purposes
-count_file <- "data/gut_saliva_data/low_sequencing_depth_hmp_data.txt"
-tree_file <- "data/gut_saliva_data/low_sequencing_depth_subtree.tre"
-output_folder <- "gut_saliva_output/low_sequencing_depth/less_than_3000_readcounts_"
+# count_file <- "data/gut_saliva_data/low_sequencing_depth_hmp_data.txt"
+# tree_file <- "data/gut_saliva_data/low_sequencing_depth_subtree.tre"
+# output_folder <- "gut_saliva_output/low_sequencing_depth/less_than_3000_readcounts_"
 
 plot_all_gut_saliva_unifrac("data/gut_saliva_data/low_sequencing_depth_hmp_data.txt", "data/gut_saliva_data/low_sequencing_depth_subtree.tre","gut_saliva_output/low_sequencing_depth/less_than_3000_readcounts_")
 plot_all_gut_saliva_unifrac("data/gut_saliva_data/med_sequencing_depth_hmp_data.txt", "data/gut_saliva_data/med_sequencing_depth_subtree.tre","gut_saliva_output/low_sequencing_depth/3000_to_6000_readcounts_")
