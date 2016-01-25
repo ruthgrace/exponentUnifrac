@@ -48,7 +48,7 @@ ratio <- all_distance_matrices[["ratio"]]
 write.table(ratio,file="tongue_cheek_output/ratio_normalize_distance_matrix.txt",sep="\t",quote=FALSE)
 ratio_no_log <- all_distance_matrices[["ratio_no_log"]]
 write.table(ratio_no_log,file="tongue_cheek_output/ratio_no_log_normalize_distance_matrix.txt",sep="\t",quote=FALSE)
-# 
+
 # unweighted <- read.table("tongue_cheek_output/unweighted_distance_matrix.txt", sep = "\t", header = TRUE, row.names=1, quote = "")
 # weighted <- read.table("tongue_cheek_output/weighted_distance_matrix.txt", sep = "\t", header = TRUE, row.names=1, quote = "")
 # information <- read.table("tongue_cheek_output/information_distance_matrix.txt", sep = "\t", header = TRUE, row.names=1, quote = "")
@@ -118,6 +118,9 @@ weighted.vector <- unlist(weighted[lower.tri(weighted,diag=TRUE)])
 information.vector <- unlist(information[lower.tri(information,diag=TRUE)])
 ratio.vector <- unlist(ratio[lower.tri(ratio,diag=TRUE)])
 ratio_no_log.vector <- unlist(ratio_no_log[lower.tri(ratio_no_log,diag=TRUE)])
+
+# replace abbreviations with full body site names (there aren't actually any dominant taxa in this data set)
+taxonomyGroups <- as.factor(c("Cheek","Tongue"))
 
 pdf("tongue_cheek_output/pcoa_plots.pdf")
 par(oma=c(1,1,1,5))
