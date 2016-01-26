@@ -51,6 +51,12 @@ write.table(information,file="nash_output/information_distance_matrix.txt",sep="
 write.table(ratio,file="nash_output/ratio_distance_matrix.txt",sep="\t",quote=FALSE)
 write.table(ratio_no_log,file="nash_output/ratio_no_log_distance_matrix.txt",sep="\t",quote=FALSE)
 
+# unweighted <- read.table("nash_output/unweighted_distance_matrix.txt", sep = "\t", quote = "", row.names = 1, check.names = FALSE)
+# weighted <- read.table("nash_output/weighted_distance_matrix.txt", sep = "\t", quote = "", row.names = 1, check.names = FALSE)
+# information <- read.table("nash_output/information_distance_matrix.txt", sep = "\t", quote = "", row.names = 1, check.names = FALSE)
+# ratio <- read.table("nash_output/ratio_distance_matrix.txt", sep = "\t", quote = "", row.names = 1, check.names = FALSE)
+# ratio_no_log <- read.table("nash_output/ratio_no_log_distance_matrix.txt", sep = "\t", quote = "", row.names = 1, check.names = FALSE)
+
 # conditions: Originally 0 meant steatohepatosis, and 1 meant NASH
 groups <- metadata$SSvsNASH[match(rownames(otu.tab),rownames(metadata))]
 originalgroups <- groups
@@ -108,9 +114,9 @@ plot(weighted.pcoa$vectors[,1],weighted.pcoa$vectors[,2], col=groups,main="Weigh
 legend("right", levels(groups), pch=c(19,19), col=palette()[c(1:2)], xpd=NA, inset=c(-0.25,0))
 plot(information.pcoa$vectors[,1],information.pcoa$vectors[,2], col=groups,main="Information UniFrac\nprincipal coordinates analysis",xlab=paste("First Component", round(information.varEx[1],digits=3),"variance explained"),ylab=paste("Second Component", round(information.varEx[2],digits=3),"variance explained"),pch=19,cex.lab=1.4,cex.main=2)
 legend("right", levels(groups), pch=c(19,19), col=palette()[c(1:2)], xpd=NA, inset=c(-0.25,0))
-plot(ratio.pcoa$vectors[,1],ratio.pcoa$vectors[,2], col=groups,main="Ratio Normalized UniFrac\nprincipal coordinates analysis",xlab=paste("First Component", round(ratio.varEx[1],digits=3),"variance explained"),ylab=paste("Second Component", round(ratio.varEx[2],digits=3),"variance explained"),pch=19,cex.lab=1.4,cex.main=2)
+plot(ratio.pcoa$vectors[,1],ratio.pcoa$vectors[,2], col=groups,main="Centered Log Ratio UniFrac\nprincipal coordinates analysis",xlab=paste("First Component", round(ratio.varEx[1],digits=3),"variance explained"),ylab=paste("Second Component", round(ratio.varEx[2],digits=3),"variance explained"),pch=19,cex.lab=1.4,cex.main=2)
 legend("right", levels(groups), pch=c(19,19), col=palette()[c(1:2)], xpd=NA, inset=c(-0.25,0))
-plot(ratio_no_log.pcoa$vectors[,1],ratio_no_log.pcoa$vectors[,2], col=groups,main="Ratio (no log) Normalized UniFrac\nprincipal coordinates analysis",xlab=paste("First Component", round(ratio_no_log.varEx[1],digits=3),"variance explained"),ylab=paste("Second Component", round(ratio_no_log.varEx[2],digits=3),"variance explained"),pch=19,cex.lab=1.4,cex.main=2)
+plot(ratio_no_log.pcoa$vectors[,1],ratio_no_log.pcoa$vectors[,2], col=groups,main="Centered Ratio UniFrac\nprincipal coordinates analysis",xlab=paste("First Component", round(ratio_no_log.varEx[1],digits=3),"variance explained"),ylab=paste("Second Component", round(ratio_no_log.varEx[2],digits=3),"variance explained"),pch=19,cex.lab=1.4,cex.main=2)
 legend("right", levels(groups), pch=c(19,19), col=palette()[c(1:2)], xpd=NA, inset=c(-0.25,0))
 
 #plot correlation between different UniFrac modes
