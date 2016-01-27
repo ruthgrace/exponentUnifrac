@@ -230,3 +230,37 @@ plot(ratio_no_log.pcoa$vectors[,1],ratio_no_log.pcoa$vectors[,2], col=groups,mai
 # 
 dev.off()
 # 
+
+### BIPLOT
+library(ALDEx2)
+
+breastmilk.otu.tab <- read.table("./data/camilla_data/td_OTU_tag_mapped_lineage.txt", header=T, sep="\t", row.names=1, comment.char="", check.names=FALSE)
+
+#remove taxonomy column to make otu count matrix numeric
+taxonomy <- breastmilk.otu.tab$taxonomy
+breastmilk.otu.tab <- breastmilk.otu.tab[-length(colnames(breastmilk.otu.tab))]
+breastmilk.otu.tab <- as.data.frame(breastmilk.otu.tab)
+
+groups <- rep("Not Infected",length(colnames(breastmilk.otu.tab)))
+groups[which(colnames(breastmilk.otu.tab)=="S38I")] <- "Infected"
+
+# TODO: can't compare a condition with only one sample to a condition with lots of samples...
+
+x <- aldex.clr(breastmilk.otu.tab)
+x.e <- aldex.effect(x, groups)
+x.t <- aldex.ttest(x, groups)
+x.all <- data.frame(x.t, x.e)
+
+# duplicate the data for the biplot and clustering
+breastmilk.otu.tab.prior <- breastmilk.otu.tab
+breastmilk.otu.tab.prior[breastmilk.otu.tab.prior == 0] <- 0.5
+
+bi <- acomp(t(breastmilk.otu.tab.prior))
+clr <- t(apply(breastmilk.otu.tab.prior, 2, function(x){log(x) - mean(log(x))}))
+pcx <- prcomp(clr)
+sum(pcx$sdev[1]^2)/mvar(clr)
+sum(pcx$sdev[2]^2)/mvar(clr)
+sum(pcx$sdev[3]^2)/mvar(clr)
+pdf("breastmilk_output/biplot.pdf")
+biplot(pcx, cex=0.6, col=c("black", "red"), scale=0, arrow.len=0, var.axes=F)
+dev.off()

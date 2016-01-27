@@ -272,3 +272,41 @@ plot(ratio.vector,weighted.vector,main="normalized ratio vs. weighted UniFrac")
 plot(ratio_no_log.vector,weighted.vector,main="normalized no log ratio vs. weighted UniFrac")
 dev.off()
 
+
+
+### BIPLOT
+library(ALDEx2)
+library(compositions)
+
+otu.tab <- read.table("data/tongue_cheek_data/hmp_tongue_cheek_data.txt", header=T, sep="\t", row.names=1, comment.char="", check.names=FALSE)
+
+groups <- colnames(otu.tab)
+groups <- gsub("_.*$","",groups)
+
+x <- aldex.clr(otu.tab)
+x.e <- aldex.effect(x, groups)
+x.t <- aldex.ttest(x, groups)
+x.all <- data.frame(x.t, x.e)
+
+# duplicate the data for the biplot and clustering
+otu.tab.prior <- otu.tab
+otu.tab.prior[otu.tab.prior == 0] <- 0.5
+
+bi <- acomp(t(otu.tab.prior))
+clr <- t(apply(otu.tab.prior, 2, function(x){log(x) - mean(log(x))}))
+pcx <- prcomp(clr)
+sum(pcx$sdev[1]^2)/mvar(clr)
+# [1] 0.1926549
+sum(pcx$sdev[2]^2)/mvar(clr)
+# [1] 0.06741566
+sum(pcx$sdev[3]^2)/mvar(clr)
+# [1] 0.0477463
+
+save(pcx,file="tongue_cheek_output/biplot_data.rdat")
+## load with
+# load(file="tongue_cheek_output/biplot_data.rdat")
+
+pdf("tongue_cheek_output/biplot.pdf")
+biplot(pcx, cex=0.6, col=c("black", "red"), scale=0, arrow.len=0, var.axes=F)
+dev.off()
+
