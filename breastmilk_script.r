@@ -10,7 +10,7 @@ library(vegan)
 # get default par
 plotParameters <- par()
 
-source("UniFrac_original.r")
+source("UniFrac.r")
 
 # read OTU table and format appropriately for input into UniFrac methods
 breastmilk.otu.tab <- read.table("./data/camilla_data/td_OTU_tag_mapped_lineage.txt", header=T, sep="\t", row.names=1, comment.char="", check.names=FALSE)
@@ -42,18 +42,20 @@ otu_indicies <- otu_indicies[!is.na(otu_indicies)]
 breastmilk.otu.tab <- breastmilk.otu.tab[otu_indicies,]
 MyMetaOrdered <- MyMeta[match(rownames(breastmilk.otu.tab),rownames(MyMeta)),]
 
-# otuTable <- breastmilk.otu.tab.rarefy
-# tree <- breastmilk.tree
-# method="ratio"
-# verbose=TRUE
-# pruneTree=FALSE
-# normalize=TRUE
+otuTable <- breastmilk.otu.tab
+tree <- breastmilk.tree
+method = "all"
+verbose = TRUE
+pruneTree = FALSE
+normalize = TRUE
 
-unweighted <- getDistanceMatrix(breastmilk.otu.tab.rarefy,breastmilk.tree,method="unweighted",verbose=TRUE)
-weighted <- getDistanceMatrix(breastmilk.otu.tab,breastmilk.tree,method="weighted",verbose=TRUE)
-information <- getDistanceMatrix(breastmilk.otu.tab,breastmilk.tree,method="information",verbose=TRUE)
-ratio <- getDistanceMatrix(breastmilk.otu.tab,breastmilk.tree,method="ratio",verbose=TRUE)
-ratio_no_log <- getDistanceMatrix(breastmilk.otu.tab,breastmilk.tree,method="ratio_no_log",verbose=TRUE)
+all_distance_matrices <- getDistanceMatrix(breastmilk.otu.tab,breastmilk.tree,method="all",verbose=TRUE)
+
+unweighted <- all_distance_matrices[["unweighted"]]
+weighted <- all_distance_matrices[["weighted"]]
+information <- all_distance_matrices[["information"]]
+ratio <- all_distance_matrices[["ratio"]]
+ratio_no_log <- all_distance_matrices[["ratio_no_log"]]
 
 groups <- rep("Not Infected",length(MyMetaOrdered$Gestation))
 groups[which(rownames(MyMetaOrdered)=="S38I")] <- "Infected"
@@ -124,7 +126,7 @@ ratio_no_log.pc1.varEx <- sd(ratio_no_log.pcoa$vector[,1])*sd(ratio_no_log.pcoa$
 ratio_no_log.pc2.varEx <- sd(ratio_no_log.pcoa$vector[,2])*sd(ratio_no_log.pcoa$vector[,2])/ratio_no_log.varExplained
 
 #save plots as PDF
-pdf("breastmilk_output/original_unifrac_breastmilk_pcoa_plots_infected.pdf")
+pdf("breastmilk_output/efficient_unifrac_breastmilk_pcoa_plots_infected.pdf")
 
 
 # # MAKE BAR PLOTS
@@ -188,9 +190,9 @@ plot(information.pcoa$vectors[,1],information.pcoa$vectors[,2], col=groups,main=
 # #placement with S38I excluded
 # legend(0.4,-0.15,levels(groups),col=palette(),pch=19)
 
-plot(ratio.pcoa$vectors[,1],ratio.pcoa$vectors[,2], col=groups,main="Centered Log Ratio UniFrac\nprincipal coordinate analysis",xlab=paste("First Component", round(ratio.pc1.varEx,digits=3),"variance explained"),ylab=paste("Second Component", round(ratio.pc2.varEx,digits=3),"variance explained"),pch=19,cex.lab=1.4,cex.main=2)
+plot(ratio.pcoa$vectors[,1],ratio.pcoa$vectors[,2], col=groups,main="ratio UniFrac\nprincipal coordinate analysis",xlab=paste("First Component", round(ratio.pc1.varEx,digits=3),"variance explained"),ylab=paste("Second Component", round(ratio.pc2.varEx,digits=3),"variance explained"),pch=19,cex.lab=1.4,cex.main=2)
 
-plot(ratio_no_log.pcoa$vectors[,1],ratio_no_log.pcoa$vectors[,2], col=groups,main="Centered Ratio UniFrac\nprincipal coordinate analysis",xlab=paste("First Component", round(ratio_no_log.pc1.varEx,digits=3),"variance explained"),ylab=paste("Second Component", round(ratio_no_log.pc2.varEx,digits=3),"variance explained"),pch=19,cex.lab=1.4,cex.main=2)
+plot(ratio_no_log.pcoa$vectors[,1],ratio_no_log.pcoa$vectors[,2], col=groups,main="non log ratio UniFrac\nprincipal coordinate analysis",xlab=paste("First Component", round(ratio_no_log.pc1.varEx,digits=3),"variance explained"),ylab=paste("Second Component", round(ratio_no_log.pc2.varEx,digits=3),"variance explained"),pch=19,cex.lab=1.4,cex.main=2)
 
 # # BIPLOT
 # 
@@ -228,3 +230,37 @@ plot(ratio_no_log.pcoa$vectors[,1],ratio_no_log.pcoa$vectors[,2], col=groups,mai
 # 
 dev.off()
 # 
+
+### BIPLOT
+library(ALDEx2)
+
+breastmilk.otu.tab <- read.table("./data/camilla_data/td_OTU_tag_mapped_lineage.txt", header=T, sep="\t", row.names=1, comment.char="", check.names=FALSE)
+
+#remove taxonomy column to make otu count matrix numeric
+taxonomy <- breastmilk.otu.tab$taxonomy
+breastmilk.otu.tab <- breastmilk.otu.tab[-length(colnames(breastmilk.otu.tab))]
+breastmilk.otu.tab <- as.data.frame(breastmilk.otu.tab)
+
+groups <- rep("Not Infected",length(colnames(breastmilk.otu.tab)))
+groups[which(colnames(breastmilk.otu.tab)=="S38I")] <- "Infected"
+
+# TODO: can't compare a condition with only one sample to a condition with lots of samples...
+
+x <- aldex.clr(breastmilk.otu.tab)
+x.e <- aldex.effect(x, groups)
+x.t <- aldex.ttest(x, groups)
+x.all <- data.frame(x.t, x.e)
+
+# duplicate the data for the biplot and clustering
+breastmilk.otu.tab.prior <- breastmilk.otu.tab
+breastmilk.otu.tab.prior[breastmilk.otu.tab.prior == 0] <- 0.5
+
+bi <- acomp(t(breastmilk.otu.tab.prior))
+clr <- t(apply(breastmilk.otu.tab.prior, 2, function(x){log(x) - mean(log(x))}))
+pcx <- prcomp(clr)
+sum(pcx$sdev[1]^2)/mvar(clr)
+sum(pcx$sdev[2]^2)/mvar(clr)
+sum(pcx$sdev[3]^2)/mvar(clr)
+pdf("breastmilk_output/biplot.pdf")
+biplot(pcx, cex=0.6, col=c("black", "red"), scale=0, arrow.len=0, var.axes=F)
+dev.off()

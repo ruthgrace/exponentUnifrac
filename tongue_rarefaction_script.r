@@ -4,7 +4,7 @@ options(error=recover)
 #this script prints out PDF pcoa plots and distance matrices, given an OTU table, phylogenetic tree, and metadata
 # run: nohup Rscript ./tongue_rarefaction_script.r > tongue_rarefaction_script_nohup.out 2>&1&
 
-source("UniFrac_memory_efficient.r")
+source("UniFrac.r")
 library(ape)
 library(phangorn)
 library(vegan)
