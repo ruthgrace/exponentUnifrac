@@ -42,16 +42,10 @@ otu_indicies <- otu_indicies[!is.na(otu_indicies)]
 breastmilk.otu.tab <- breastmilk.otu.tab[otu_indicies,]
 MyMetaOrdered <- MyMeta[match(rownames(breastmilk.otu.tab),rownames(MyMeta)),]
 
-otuTable <- breastmilk.otu.tab
-tree <- breastmilk.tree
-method = "all"
-verbose = TRUE
-pruneTree = FALSE
-normalize = TRUE
+unweighted <- getDistanceMatrix(breastmilk.otu.tab.rarefy,breastmilk.tree,method="unweighted",verbose=TRUE)
 
 all_distance_matrices <- getDistanceMatrix(breastmilk.otu.tab,breastmilk.tree,method="all",verbose=TRUE)
 
-unweighted <- all_distance_matrices[["unweighted"]]
 weighted <- all_distance_matrices[["weighted"]]
 information <- all_distance_matrices[["information"]]
 ratio <- all_distance_matrices[["ratio"]]
@@ -228,39 +222,4 @@ plot(ratio_no_log.pcoa$vectors[,1],ratio_no_log.pcoa$vectors[,2], col=groups,mai
 # biplot(information.pcoa,otuEntropy)
 # 
 # 
-dev.off()
-# 
-
-### BIPLOT
-library(ALDEx2)
-
-breastmilk.otu.tab <- read.table("./data/camilla_data/td_OTU_tag_mapped_lineage.txt", header=T, sep="\t", row.names=1, comment.char="", check.names=FALSE)
-
-#remove taxonomy column to make otu count matrix numeric
-taxonomy <- breastmilk.otu.tab$taxonomy
-breastmilk.otu.tab <- breastmilk.otu.tab[-length(colnames(breastmilk.otu.tab))]
-breastmilk.otu.tab <- as.data.frame(breastmilk.otu.tab)
-
-groups <- rep("Not Infected",length(colnames(breastmilk.otu.tab)))
-groups[which(colnames(breastmilk.otu.tab)=="S38I")] <- "Infected"
-
-# TODO: can't compare a condition with only one sample to a condition with lots of samples...
-
-x <- aldex.clr(breastmilk.otu.tab)
-x.e <- aldex.effect(x, groups)
-x.t <- aldex.ttest(x, groups)
-x.all <- data.frame(x.t, x.e)
-
-# duplicate the data for the biplot and clustering
-breastmilk.otu.tab.prior <- breastmilk.otu.tab
-breastmilk.otu.tab.prior[breastmilk.otu.tab.prior == 0] <- 0.5
-
-bi <- acomp(t(breastmilk.otu.tab.prior))
-clr <- t(apply(breastmilk.otu.tab.prior, 2, function(x){log(x) - mean(log(x))}))
-pcx <- prcomp(clr)
-sum(pcx$sdev[1]^2)/mvar(clr)
-sum(pcx$sdev[2]^2)/mvar(clr)
-sum(pcx$sdev[3]^2)/mvar(clr)
-pdf("breastmilk_output/biplot.pdf")
-biplot(pcx, cex=0.6, col=c("black", "red"), scale=0, arrow.len=0, var.axes=F)
 dev.off()
