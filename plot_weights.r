@@ -15,20 +15,13 @@ unweighted = function(x) {
   }
 }
 
-# geometric mean is assumed to be 0.01
-
-centered_ratio = function(x) {
-  return(log2(x) - log2(0.01))
-}
-
 xvals <- c(0:1000)
 xvals <- xvals / 1000
 
 plot.new()
 
-lines(xvals, sapply(xvals,unweighted,simplify=TRUE), col = "black",xlab = "proportional abundance")
-lines(xvals, sapply(xvals,weighted,simplify=TRUE), col = "red",xlab = "proportional abundance")
-lines(xvals, sapply(xvals,information,simplify=TRUE), col = "blue",xlab = "proportional abundance")
-lines(xvals, sapply(xvals,centered_ratio,simplify=TRUE), col = "orange",xlab = "proportional abundance")
+lines(xvals, sapply(xvals,unweighted,simplify=TRUE), col = "black",xlab = "proportional abundance", lwd = 3)
+lines(xvals, sapply(xvals,weighted,simplify=TRUE), col = "red",xlab = "proportional abundance", lwd = 3)
+lines(xvals, sapply(xvals,information,simplify=TRUE), col = "blue",xlab = "proportional abundance", lwd = 3)
 axis(1)
 axis(2)

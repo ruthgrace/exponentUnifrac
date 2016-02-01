@@ -102,9 +102,9 @@ information.varExplained <- sum(apply(information.pcoa$vector,2,function(x) sd(x
 ratio.varExplained <- sum(apply(ratio.pcoa$vector,2,function(x) sd(x)*sd(x)))
 ratio_no_log.varExplained <- sum(apply(ratio_no_log.pcoa$vector,2,function(x) sd(x)*sd(x)))
 
-# calculate proportion of variance explained by first component
+# calculate proportion of variance explained by First Coordinate
 unweighted.pc1.varEx <- sd(unweighted.pcoa$vector[,1])*sd(unweighted.pcoa$vector[,1])/unweighted.varExplained
-#calculate proportion of variance explained by second component
+#calculate proportion of variance explained by Second Coordinate
 unweighted.pc2.varEx <- sd(unweighted.pcoa$vector[,2])*sd(unweighted.pcoa$vector[,2])/unweighted.varExplained
 
 weighted.pc1.varEx <- sd(weighted.pcoa$vector[,1])*sd(weighted.pcoa$vector[,1])/weighted.varExplained
@@ -169,24 +169,24 @@ pdf("breastmilk_output/efficient_unifrac_breastmilk_pcoa_plots_infected.pdf")
 palette(c("red","black","cyan","dodgerblue","blue","orange"))
 
 #plot pcoa plots with legend
-plot(unweighted.pcoa$vectors[,1],unweighted.pcoa$vectors[,2], type="p",col=groups,main="Unweighted UniFrac\nprincipal coordinate analysis",xlab=paste("First Component", round(unweighted.pc1.varEx,digits=3),"variance explained"),ylab=paste("Second Component", round(unweighted.pc2.varEx,digits=3),"variance explained"),pch=19,cex.lab=1.4,cex.main=2)
+plot(unweighted.pcoa$vectors[,1],unweighted.pcoa$vectors[,2], type="p",col=groups,main="Unweighted UniFrac\nprincipal coordinate analysis",xlab=paste("First Coordinate", round(unweighted.pc1.varEx,digits=3),"variance explained"),ylab=paste("Second Coordinate", round(unweighted.pc2.varEx,digits=3),"variance explained"),pch=19,cex.lab=1.4,cex.main=2)
 #placement with S38I included
 #legend(-0.1,-0.055,levels(groups),col=palette(),pch=19)
 # #placement with S38I excluded
 # legend(0.055,0.15,levels(groups),col=palette(),pch=19)
 
-plot(weighted.pcoa$vectors[,1],weighted.pcoa$vectors[,2], col=groups,main="Weighted UniFrac\nprincipal coordinate analysis",xlab=paste("First Component", round(weighted.pc1.varEx,digits=3),"variance explained"),ylab=paste("Second Component", round(weighted.pc2.varEx,digits=3),"variance explained"),pch=19,cex.lab=1.4,cex.main=2)
+plot(weighted.pcoa$vectors[,1],weighted.pcoa$vectors[,2], col=groups,main="Weighted UniFrac\nprincipal coordinate analysis",xlab=paste("First Coordinate", round(weighted.pc1.varEx,digits=3),"variance explained"),ylab=paste("Second Coordinate", round(weighted.pc2.varEx,digits=3),"variance explained"),pch=19,cex.lab=1.4,cex.main=2)
 #legend(-0.1,-0.12,levels(groups),col=palette(),pch=19)
 
-plot(information.pcoa$vectors[,1],information.pcoa$vectors[,2], col=groups,main="Information UniFrac\nprincipal coordinate analysis",xlab=paste("First Component", round(information.pc1.varEx,digits=3),"variance explained"),ylab=paste("Second Component", round(information.pc2.varEx,digits=3),"variance explained"),pch=19,cex.lab=1.4,cex.main=2)
+plot(information.pcoa$vectors[,1],information.pcoa$vectors[,2], col=groups,main="Information UniFrac\nprincipal coordinate analysis",xlab=paste("First Coordinate", round(information.pc1.varEx,digits=3),"variance explained"),ylab=paste("Second Coordinate", round(information.pc2.varEx,digits=3),"variance explained"),pch=19,cex.lab=1.4,cex.main=2)
 #placement with S38I included
 #legend(-0.15,-0.4,levels(groups),col=palette(),pch=19)
 # #placement with S38I excluded
 # legend(0.4,-0.15,levels(groups),col=palette(),pch=19)
 
-plot(ratio.pcoa$vectors[,1],ratio.pcoa$vectors[,2], col=groups,main="ratio UniFrac\nprincipal coordinate analysis",xlab=paste("First Component", round(ratio.pc1.varEx,digits=3),"variance explained"),ylab=paste("Second Component", round(ratio.pc2.varEx,digits=3),"variance explained"),pch=19,cex.lab=1.4,cex.main=2)
+plot(ratio.pcoa$vectors[,1],ratio.pcoa$vectors[,2], col=groups,main="ratio UniFrac\nprincipal coordinate analysis",xlab=paste("First Coordinate", round(ratio.pc1.varEx,digits=3),"variance explained"),ylab=paste("Second Coordinate", round(ratio.pc2.varEx,digits=3),"variance explained"),pch=19,cex.lab=1.4,cex.main=2)
 
-plot(ratio_no_log.pcoa$vectors[,1],ratio_no_log.pcoa$vectors[,2], col=groups,main="non log ratio UniFrac\nprincipal coordinate analysis",xlab=paste("First Component", round(ratio_no_log.pc1.varEx,digits=3),"variance explained"),ylab=paste("Second Component", round(ratio_no_log.pc2.varEx,digits=3),"variance explained"),pch=19,cex.lab=1.4,cex.main=2)
+plot(ratio_no_log.pcoa$vectors[,1],ratio_no_log.pcoa$vectors[,2], col=groups,main="Centered Ratio UniFrac\nprincipal coordinate analysis",xlab=paste("First Coordinate", round(ratio_no_log.pc1.varEx,digits=3),"variance explained"),ylab=paste("Second Coordinate", round(ratio_no_log.pc2.varEx,digits=3),"variance explained"),pch=19,cex.lab=1.4,cex.main=2)
 
 # # BIPLOT
 # 
