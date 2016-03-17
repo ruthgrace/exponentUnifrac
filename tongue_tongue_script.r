@@ -8,80 +8,48 @@ library(ape)
 library(phangorn)
 library(vegan)
 
-otu.tab <- read.table("data/td_OTU_tag_mapped_lineage.txt", header=T, sep="\t", row.names=1, comment.char="", check.names=FALSE)
+otu.tab <- read.table("data/tongue_tongue_data/tongue_tongue_data.txt", header=T, sep="\t", row.names=1, comment.char="", check.names=FALSE)
 
-#remove taxonomy column to make otu count matrix numeric
-taxonomy <- otu.tab$taxonomy
-otu.tab <- otu.tab[-length(colnames(otu.tab))]
 otu.tab <- t(as.matrix(otu.tab))
 
 #sort taxa from most to least abundant
 taxaOrder <- rev(order(apply(otu.tab,2,sum)))
-taxonomy <- taxonomy[taxaOrder]
 otu.tab <- otu.tab[,taxaOrder]
 
 # read and root tree (rooted tree is required)
-tree <- read.tree("data/fasttree_all_seed_OTUs.tre")
+tree <- read.tree("data/tongue_tongue_data/tongue_tongue_subtree.tre")
 tree <- midpoint(tree)
 
-# read metadata
-MyMeta<- read.table("data/metadata.txt", header=T, sep="\t", row.names=1, comment.char="", check.names=FALSE)
-
-# filter OTU table and metadata so that only samples which appear in both are retained
-otu_indicies <- match(rownames(MyMeta),rownames(otu.tab))
-otu_indicies <- otu_indicies[!is.na(otu_indicies)]
-otu.tab <- otu.tab[otu_indicies,]
-MyMetaOrdered <- MyMeta[match(rownames(otu.tab),rownames(MyMeta)),]
+groups <- as.factor(substr(rownames(otu.tab),0,4))
 
 #rarefy data for unweighted unifrac
 otu.tab.rarefy <- rrarefy(otu.tab, min(apply(otu.tab,1,sum)))
 
-#calculate distance matrix
-unweighted <- getDistanceMatrix(otu.tab.rarefy,tree,method="unweighted",verbose=TRUE)
-weighted <- getDistanceMatrix(otu.tab,tree,method="weighted",verbose=TRUE)
-information <- getDistanceMatrix(otu.tab,tree,method="information",verbose=TRUE)
-ratio_no_log <- getDistanceMatrix(otu.tab,tree,method="ratio_no_log",verbose=TRUE)
+#get rid of zero sum columns
+otu.tab.rarefy.sum <- apply(otu.tab.rarefy,2,sum)
+otu.tab.rarefy.notzero <- otu.tab.rarefy[, otu.tab.rarefy.sum > 0]
+otu.tab.rarefy <- otu.tab.rarefy.notzero
 
-#output distance matrices
-write.table(unweighted,file="output/unweighted_distance_matrix.txt",sep="\t",quote=FALSE)
-write.table(weighted,file="output/weighted_distance_matrix.txt",sep="\t",quote=FALSE)
-write.table(information,file="output/information_distance_matrix.txt",sep="\t",quote=FALSE)
-write.table(ratio_no_log,file="output/ratio_no_log_normalize_distance_matrix.txt",sep="\t",quote=FALSE)
+#get rid of zero sum OTUs in tree
+tree.rarefy <- tree
 
-#conditions (bv - bacterial vaginosis as scored by nugent/amsel, i - intermediate, n - normal/healthy)
-groups <- MyMetaOrdered$n_status #levels bv, i, n
-originalgroups <- groups
-# change conditions so that samples which are more than 50% one taxa are colored by that taxa
-otuSum <- apply(otu.tab,1,sum)
-otuMax <- apply(otu.tab,1,max)
-otuWhichMax <- apply(otu.tab,1,which.max)
-otuDominated <- which(otuMax > otuSum/2)
-
-
-otuMaxTax <- taxonomy[otuWhichMax]
-#otuDominated <- c(otuDominated[which(as.numeric(otuMaxTax[otuDominated])==32)],otuDominated[which(as.numeric(otuMaxTax[otuDominated])==33)])
-
-taxonomyGroups <- as.character(groups)
-taxonomyGroups[otuDominated] <- as.character(otuMaxTax[otuDominated])
-
-taxonomyGroups <- as.factor(taxonomyGroups)
-
-groups <- taxonomyGroups
-
-# assign appropriate names to single taxa dominated groups
-newLevels <- levels(taxonomyGroups)
-splittaxa <- strsplit(levels(taxonomyGroups),split=";")
-
-for (i in 1:length(splittaxa)) {
-	if (length(splittaxa[[i]])>1) {
-		newLevels[i] <- paste(splittaxa[[i]][length(splittaxa[[i]])-1],splittaxa[[i]][length(splittaxa[[i]])])
-	}
-	else {
-		newLevels[i] <- splittaxa[[i]][1]
-	}
+tree.rarefy$tip.label <- gsub("'","",tree.rarefy$tip.label)
+absent <- tree.rarefy$tip.label[!(tree.rarefy$tip.label %in% colnames(otu.tab.rarefy))]
+if (length(absent) != 0) {
+		tree.rarefy <- drop.tip(tree.rarefy, absent)
 }
 
-levels(taxonomyGroups) <- newLevels
+
+#calculate distance matrix
+unweighted <- getDistanceMatrix(otu.tab.rarefy,tree.rarefy,method="unweighted",verbose=TRUE)
+write.table(unweighted,file="output/unweighted_distance_matrix.txt",sep="\t",quote=FALSE)
+all_distance_matrices <- getDistanceMatrix(otu.tab,tree,method="all",verbose=TRUE)
+weighted <- all_distance_matrices[["weighted"]]
+write.table(weighted,file="output/weighted_distance_matrix.txt",sep="\t",quote=FALSE)
+information <- all_distance_matrices[["information"]]
+write.table(information,file="output/information_distance_matrix.txt",sep="\t",quote=FALSE)
+ratio_no_log <- all_distance_matrices[["ratio_no_log"]]
+write.table(ratio_no_log,file="output/ratio_no_log_distance_matrix.txt",sep="\t",quote=FALSE)
 
 unweighted.pcoa <- pcoa(unweighted)
 weighted.pcoa <- pcoa(weighted)
@@ -114,9 +82,9 @@ pdf("output/pcoa_plots.pdf")
 #plot pcoa plots
 plot(unweighted.pcoa$vectors[,1],unweighted.pcoa$vectors[,2], col=groups,main="Unweighted UniFrac\nprincipal coordinates analysis",xlab=paste("First Component", round(unweighted.varEx[1],digits=3),"variance explained"),ylab=paste("Second Component", round(unweighted.varEx[2],digits=3),"variance explained"),pch=19,cex.lab=1.4,cex.main=2)
 plot(weighted.pcoa$vectors[,1],weighted.pcoa$vectors[,2], col=groups,main="Weighted UniFrac\nprincipal coordinates analysis",xlab=paste("First Component", round(weighted.varEx[1],digits=3),"variance explained"),ylab=paste("Second Component", round(weighted.varEx[2],digits=3),"variance explained"),pch=19,cex.lab=1.4,cex.main=2)
-legend(0.2,0.32,levels(taxonomyGroups),col=palette(),pch=19)
+legend(0.2,0.32,levels(groups),col=palette(),pch=19)
 plot(information.pcoa$vectors[,1],information.pcoa$vectors[,2], col=groups,main="Information UniFrac\nprincipal coordinates analysis",xlab=paste("First Component", round(information.varEx[1],digits=3),"variance explained"),ylab=paste("Second Component", round(information.varEx[2],digits=3),"variance explained"),pch=19,cex.lab=1.4,cex.main=2)
-plot(ratio_no_log.pcoa$vectors[,1],ratio_no_log.pcoa$vectors[,2], col=groups,main="Ratio UniFrac\nprincipal coordinates analysis",xlab=paste("First Component", round(exponent.varEx[1],digits=3),"variance explained"),ylab=paste("Second Component", round(exponent.varEx[2],digits=3),"variance explained"),pch=19,cex.lab=1.4,cex.main=2)
+plot(ratio_no_log.pcoa$vectors[,1],ratio_no_log.pcoa$vectors[,2], col=groups,main="Ratio UniFrac\nprincipal coordinates analysis",xlab=paste("First Component", round(ratio_no_log.varEx[1],digits=3),"variance explained"),ylab=paste("Second Component", round(ratio_no_log.varEx[2],digits=3),"variance explained"),pch=19,cex.lab=1.4,cex.main=2)
 
 #plot correlation between different UniFrac modes
 plot(unweighted.vector,information.vector,main="unweighted vs. information UniFrac")

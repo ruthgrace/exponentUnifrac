@@ -14,7 +14,7 @@ getVarExplained <- function(vector) {
 }
 
 plot_all_gut_saliva_unifrac <- function(count_file, tree_file, output_folder) {
-	source("UniFrac_memory_efficient.r")
+	source("UniFrac.r")
 	library(ape)
 	library(phangorn)
 	library(vegan)
