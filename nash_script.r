@@ -193,73 +193,16 @@ blue <- mycolor[3]
 mycolor <- rgb(red/255, green/255, blue/255, 0.3)
 
 plot(h.ss.aldex$effect, h.nash.aldex$effect, pch=19,col=mycolor, main="Effect sizes of healthy vs SS compared to healthy vs NASH",xlab="Healthy vs. SS",ylab="Healthy vs. NASH")
-fit <- lm(h.ss.aldex$effect ~ h.nash.aldex$effect)
-summary(fit)
-abline(fit,col="black")
-
-# Call:
-# lm(formula = h.ss.aldex$effect ~ h.nash.aldex$effect)
-# 
-# Residuals:
-#      Min       1Q   Median       3Q      Max 
-# -0.66274 -0.08428 -0.00394  0.11576  0.49178 
-# 
-# Coefficients:
-#                     Estimate Std. Error t value Pr(>|t|)    
-# (Intercept)          0.02476    0.01179     2.1   0.0368 *  
-# h.nash.aldex$effect  0.94293    0.04936    19.1   <2e-16 ***
-# ---
-# Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-# 
-# Residual standard error: 0.1761 on 230 degrees of freedom
-# Multiple R-squared:  0.6134,	Adjusted R-squared:  0.6117 
-# F-statistic:   365 on 1 and 230 DF,  p-value: < 2.2e-16
+cor(h.ss.aldex$effect, y = h.nash.aldex$effect, use = "everything", method = "spearman")
+# [1] 0.7808564
 
 plot(h.ss.aldex$effect, h.metnash.aldex$effect, pch=19,col=mycolor, main="Effect sizes of healthy vs SS compared to healthy vs extreme NASH",xlab="Healthy vs. SS",ylab="Healthy vs. extreme NASH")
-fit <- lm(h.ss.aldex$effect ~ h.metnash.aldex$effect)
-summary(fit)
-abline(fit,col="black")
-
-# Call:
-# lm(formula = h.ss.aldex$effect ~ h.metnash.aldex$effect)
-# 
-# Residuals:
-#      Min       1Q   Median       3Q      Max 
-# -0.75500 -0.09401  0.00670  0.12574  0.51993 
-# 
-# Coefficients:
-#                        Estimate Std. Error t value Pr(>|t|)    
-# (Intercept)            0.005845   0.014213   0.411    0.681    
-# h.metnash.aldex$effect 0.625174   0.047775  13.086   <2e-16 ***
-# ---
-# Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-# 
-# Residual standard error: 0.2145 on 230 degrees of freedom
-# Multiple R-squared:  0.4268,	Adjusted R-squared:  0.4243 
-# F-statistic: 171.2 on 1 and 230 DF,  p-value: < 2.2e-16
+cor(h.ss.aldex$effect, y = h.metnash.aldex$effect, use = "everything", method = "spearman")
+# [1] 0.6731153
 
 plot(h.nash.aldex$effect, h.metnash.aldex$effect, pch=19,col=mycolor, main="Effect sizes of healthy vs NASH compared to healthy vs extreme NASH",xlab="Healthy vs. NASH",ylab="Healthy vs. extreme NASH")
-fit <- lm(h.nash.aldex$effect ~ h.metnash.aldex$effect)
-summary(fit)
-abline(fit,col="black")
-
-# Call:
-# lm(formula = h.nash.aldex$effect ~ h.metnash.aldex$effect)
-# 
-# Residuals:
-#      Min       1Q   Median       3Q      Max 
-# -0.39763 -0.08467  0.01608  0.08021  0.45356 
-# 
-# Coefficients:
-#                        Estimate Std. Error t value Pr(>|t|)    
-# (Intercept)            -0.02012    0.00864  -2.328   0.0208 *  
-# h.metnash.aldex$effect  0.66172    0.02904  22.786   <2e-16 ***
-# ---
-# Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-# 
-# Residual standard error: 0.1304 on 230 degrees of freedom
-# Multiple R-squared:  0.693,	Adjusted R-squared:  0.6917 
-# F-statistic: 519.2 on 1 and 230 DF,  p-value: < 2.2e-16
+cor(h.nash.aldex$effect, y = h.metnash.aldex$effect, use = "everything", method = "spearman")
+# [1] 0.8413516
 
 dev.off()
 
