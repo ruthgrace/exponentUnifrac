@@ -23,6 +23,8 @@ MyMeta<- read.table("data/nash_data/metadata.txt", header=T, sep="\t", row.names
 metadata <- MyMeta[grepl("a$",rownames(MyMeta)),]
 rownames(metadata) <- gsub("a$","",rownames(metadata))
 
+metagenomic_samples <- c("CL-119", "CL-139-6mo-2", "CL-141-BL-R2", "CL-144-2", "CL-160", "CL-165", "CL-166-BL", "CL-169-BL", "CL-173-2", "CL-177", "HLD-100", "HLD-102", "HLD-111-2", "HLD-112", "HLD-23", "HLD-28", "HLD-47", "HLD-72-2", "HLD-80", "HLD-85")
+
 ## sanity check to make sure all your counts have metadata
 # which(!(colnames(otu.tab) %in% rownames(metadata)))
 
@@ -57,17 +59,26 @@ write.table(ratio_no_log,file="nash_output/ratio_no_log_distance_matrix.txt",sep
 # ratio_no_log <- read.table("nash_output/ratio_no_log_distance_matrix.txt", sep = "\t", quote = "", row.names = 1, check.names = FALSE)
 
 # conditions: Originally 0 meant steatohepatosis, and 1 meant NASH
-groups <- metadata$SSvsNASH[match(rownames(otu.tab),rownames(metadata))]
+groups <- metadata$SSvsNASH[match(colnames(otu.tab),rownames(metadata))]
 originalgroups <- groups
 
 # Make healthy represented by 0, SS by 1, NASH by 2
 groups <- groups + 1;
 groups[which(is.na(groups))] <- 0
 
-# remove SS (intermediate group)
-otu.tab.original <- otu.tab
-otu.tab <- otu.tab[which(groups != 1),]
-groups <- groups[which(groups != 1)]
+# make healthy 1, ss 2, nash 3 (healthy metagenomic will be 0 and nash metagenomic will be 4)
+groups <- groups + 1
+
+# mark healthy samples selected for metagenomic study
+groups[which(colnames(otu.tab) %in% metagenomic_samples & groups == 1)] <- 0
+
+# mark nash samples selected for metagenomic study
+groups[which(colnames(otu.tab) %in% metagenomic_samples & groups == 3)] <- 4
+
+# # remove SS (intermediate group)
+# otu.tab.original <- otu.tab
+# otu.tab <- otu.tab[which(groups != 1),]
+# groups <- groups[which(groups != 1)]
 
 unweighted.pcoa <- pcoa(unweighted)
 weighted.pcoa <- pcoa(weighted)
@@ -98,25 +109,34 @@ information.vector <- unlist(information[lower.tri(information,diag=TRUE)])
 ratio.vector <- unlist(ratio[lower.tri(ratio,diag=TRUE)])
 ratio_no_log.vector <- unlist(ratio_no_log[lower.tri(ratio_no_log,diag=TRUE)])
 
-groups[which(groups==0)] <- "Healthy"
-groups[which(groups==2)] <- "NASH"
+groups[which(groups == 0)] <- "Healthy Metagenomic"
+groups[which(groups == 1)] <- "Healthy"
+groups[which(groups == 2)] <- "SS"
+groups[which(groups == 3)] <- "NASH"
+groups[which(groups == 4)] <- "NASH Metagenomic"
 
 groups <- as.factor(groups)
 
-pdf("nash_output/pcoa_plots.pdf")
-par(oma=c(1,1,1,5))
+originalpalette <- palette()
+
+palette(c("blue4", "blue", "purple", "red", "red4"))
+
+pdf("nash_output/pcoa_plots.pdf",height=7,width=9)
+
+originalpar <- par()
+par(mar=c(5.1, 5.1, 5.1, 14.1),xpd=TRUE)
 
 #plot pcoa plots
 plot(unweighted.pcoa$vectors[,1],unweighted.pcoa$vectors[,2], col=groups,main="Unweighted UniFrac\nprincipal coordinates analysis",xlab=paste("First Component", round(unweighted.varEx[1],digits=3),"variance explained"),ylab=paste("Second Component", round(unweighted.varEx[2],digits=3),"variance explained"),pch=19,cex.lab=1.4,cex.main=2)
-legend("right", levels(groups), pch=c(19,19), col=palette()[c(1:2)], xpd=NA, inset=c(-0.25,0))
+legend("topright", levels(groups), pch=c(19,19), col=palette(), xpd=NA, inset=c(-0.45,0))
 plot(weighted.pcoa$vectors[,1],weighted.pcoa$vectors[,2], col=groups,main="Weighted UniFrac\nprincipal coordinates analysis",xlab=paste("First Component", round(weighted.varEx[1],digits=3),"variance explained"),ylab=paste("Second Component", round(weighted.varEx[2],digits=3),"variance explained"),pch=19,cex.lab=1.4,cex.main=2)
-legend("right", levels(groups), pch=c(19,19), col=palette()[c(1:2)], xpd=NA, inset=c(-0.25,0))
+legend("topright", levels(groups), pch=c(19,19), col=palette(), xpd=NA, inset=c(-0.45,0))
 plot(information.pcoa$vectors[,1],information.pcoa$vectors[,2], col=groups,main="Information UniFrac\nprincipal coordinates analysis",xlab=paste("First Component", round(information.varEx[1],digits=3),"variance explained"),ylab=paste("Second Component", round(information.varEx[2],digits=3),"variance explained"),pch=19,cex.lab=1.4,cex.main=2)
-legend("right", levels(groups), pch=c(19,19), col=palette()[c(1:2)], xpd=NA, inset=c(-0.25,0))
+legend("topright", levels(groups), pch=c(19,19), col=palette(), xpd=NA, inset=c(-0.45,0))
 plot(ratio.pcoa$vectors[,1],ratio.pcoa$vectors[,2], col=groups,main="Centered Log Ratio UniFrac\nprincipal coordinates analysis",xlab=paste("First Component", round(ratio.varEx[1],digits=3),"variance explained"),ylab=paste("Second Component", round(ratio.varEx[2],digits=3),"variance explained"),pch=19,cex.lab=1.4,cex.main=2)
-legend("right", levels(groups), pch=c(19,19), col=palette()[c(1:2)], xpd=NA, inset=c(-0.25,0))
+legend("topright", levels(groups), pch=c(19,19), col=palette(), xpd=NA, inset=c(-0.45,0))
 plot(ratio_no_log.pcoa$vectors[,1],ratio_no_log.pcoa$vectors[,2], col=groups,main="Centered Ratio UniFrac\nprincipal coordinates analysis",xlab=paste("First Component", round(ratio_no_log.varEx[1],digits=3),"variance explained"),ylab=paste("Second Component", round(ratio_no_log.varEx[2],digits=3),"variance explained"),pch=19,cex.lab=1.4,cex.main=2)
-legend("right", levels(groups), pch=c(19,19), col=palette()[c(1:2)], xpd=NA, inset=c(-0.25,0))
+legend("topright", levels(groups), pch=c(19,19), col=palette(), xpd=NA, inset=c(-0.45,0))
 
 #plot correlation between different UniFrac modes
 plot(unweighted.vector,information.vector,main="unweighted vs. information UniFrac")
@@ -128,3 +148,41 @@ plot(ratio_no_log.vector,information.vector,main="normalized ratio (no log) vs. 
 plot(ratio_no_log.vector,weighted.vector,main="normalized ratio (no log) vs. weighted UniFrac")
 
 dev.off()
+
+palette(originalpalette)
+par(originalpar)
+
+# ALDEx effect size plots
+
+library(ALDEx2)
+
+pdf("nash_output/ALDEx_effect_size_plots.pdf")
+
+h.ss <- otu.tab
+h.ss.cond <- groups
+h.ss <- h.ss[,which(h.ss.cond == "Healthy Metagenomic" | h.ss.cond == "SS")]
+h.ss.cond <- h.ss.cond[which(h.ss.cond == "Healthy Metagenomic" | h.ss.cond == "SS")]
+
+h.ss.aldex <- aldex(data.frame(h.ss),as.character(h.ss.cond))
+
+h.nash <- otu.tab
+h.nash.cond <- groups
+h.nash.cond[which(h.nash.cond == "NASH Metagenomic")] <- "NASH"
+h.nash <- h.nash[,which(h.nash.cond == "Healthy Metagenomic" | h.nash.cond == "NASH")]
+h.nash.cond <- h.nash.cond[which(h.nash.cond == "Healthy Metagenomic" | h.nash.cond == "NASH")]
+
+h.nash.aldex <- aldex(data.frame(h.nash),as.character(h.nash.cond))
+
+h.metnash <- otu.tab
+h.metnash.cond <- groups
+h.metnash <- h.metnash[,which(h.metnash.cond == "Healthy Metagenomic" | h.metnash.cond == "NASH Metagenomic")]
+h.metnash.cond <- h.metnash.cond[which(h.metnash.cond == "Healthy Metagenomic" | h.metnash.cond == "NASH Metagenomic")]
+
+h.metnash.aldex <- aldex(data.frame(h.metnash),as.character(h.metnash.cond))
+
+groups[which(groups == 0)] <- "Healthy Metagenomic"
+groups[which(groups == 1)] <- "Healthy"
+groups[which(groups == 2)] <- "SS"
+groups[which(groups == 3)] <- "NASH"
+groups[which(groups == 4)] <- "NASH Metagenomic"
+
