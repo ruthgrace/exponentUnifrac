@@ -1,4 +1,4 @@
-#!/usr/bin/env Rscript 
+#!/usr/bin/env Rscript
 options(error=recover)
 
 #this script prints out PDF pcoa plots and distance matrices, given an OTU table, phylogenetic tree, and metadata

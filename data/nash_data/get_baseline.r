@@ -14,6 +14,8 @@ rownames(d.mat) <- gsub("Healthy.","",rownames(d.mat))
 rownames(d.mat) <- gsub(".C","c",rownames(d.mat))
 rownames(d.mat) <- gsub("SS[^.]*.","",rownames(d.mat))
 
+d.mat <- d.mat[grepl(".*[ab]$",rownames(d.mat)),]
+
 samples <- substr(rownames(d.mat),1,nchar(rownames(d.mat))-1)
 samples <- list(samples)
 d.df <- as.data.frame(d.mat)
