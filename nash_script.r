@@ -10,6 +10,11 @@ library(vegan)
 
 otu.tab <- read.table("data/nash_data/summed_data_baseline_only.txt", header=T, sep="\t", row.names=1, comment.char="", check.names=FALSE)
 
+taxonomy.table <- otu.tab <- read.table("data/nash_data/td_OTU_tag_mapped_lineage.txt", header=T, sep="\t", row.names=1, comment.char="", check.names=FALSE)
+
+taxonomy <- taxonomy.table$taxonomy
+names(taxonomy) <- rownames(taxonomy.table)
+
 #sort taxa from most to least abundant
 taxaOrder <- rev(order(apply(otu.tab,2,sum)))
 otu.tab <- otu.tab[,taxaOrder]
@@ -396,15 +401,55 @@ print(h.nash.aldex$effect[(nrow(h.metnash.aldex)-decile+1):nrow(h.metnash.aldex)
 print(paste(round(h.nash.aldex$effect[(nrow(h.metnash.aldex)-decile+1):nrow(h.metnash.aldex)], digits=3),collapse="\n"))
 # [1] "0.032\n0\n0.135\n0.287\n-0.033\n0.179\n-0.099\n-0.129\n-0.356\n0.014\n-0.121\n-0.189\n-0.5\n-0.041\n-0.607\n-0.146\n-0.115\n-0.088\n0.209\n-0.382\n0.224\n-0.082\n-0.31\n0.234\n-0.104\n0.008\n-0.218\n-0.054\n0.16\n-0.373\n0.047\n-0.25\n-0.616\n0.215\n-0.308\n0.04\n-0.39\n0.085\n0.128\n-0.621\n0.204\n0.08\n-0.542\n-0.066\n-0.417\n-0.234\n-0.168\n-0.165\n-0.28\n-0.245\n-0.167\n0.018\n0.19"
 
-print(summary(abs(h.nash.aldex$effect[deciles]) - abs(h.ss.aldex$effect[deciles])))
+top <- c(1:decile)
+bottom <- c((length(effectgroup) - decile + 1):length(effectgroup))
+
+print(summary(h.nash.aldex$effect[top] - h.ss.aldex$effect[top]))
 #     Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
-# -0.99170 -0.22770 -0.05858 -0.06974  0.10540  0.68780 
-print(summary(abs(h.metnash.aldex$effect[deciles]) - abs(h.ss.aldex$effect[deciles])))
+# -0.74370 -0.22860  0.12370  0.03722  0.23350  1.22700 
+print(summary(h.metnash.aldex$effect[top] - h.ss.aldex$effect[top]))
 #    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-# -0.8667  0.1185  0.2657  0.2091  0.3691  0.7483 
-print(summary(abs(h.metnash.aldex$effect[deciles]) - abs(h.nash.aldex$effect[deciles])))
+# -0.4036  0.2397  0.4014  0.4304  0.6046  1.6990 
+print(summary(h.metnash.aldex$effect[top] - h.nash.aldex$effect[top]))
 #    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-# -0.3623  0.1843  0.2724  0.2788  0.4211  0.7645 
+# -0.3623  0.2259  0.3799  0.3932  0.5591  1.3280 
+
+
+print(summary(h.nash.aldex$effect[bottom] -  h.ss.aldex$effect[bottom]))
+#     Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
+# -0.79190 -0.18820  0.02626  0.05345  0.23830  1.05800 
+print(summary(h.metnash.aldex$effect[bottom] -  h.ss.aldex$effect[bottom]))
+#    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+# -1.1830 -0.5749 -0.3513 -0.3381 -0.1259  0.3998 
+print(summary(h.metnash.aldex$effect[bottom] -  h.nash.aldex$effect[bottom]))
+#    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+# -1.1440 -0.5865 -0.3742 -0.3916 -0.2488  0.2131 
+
+otu.genus <- c(as.character(taxonomy))
+otu.family <- c(as.character(taxonomy))
+
+for (i in c(1:length(taxonomy))) {
+  otu.genus[i] <- strsplit(otu.genus[i],c(";"))[[1]][6]
+	otu.family[i] <- strsplit(otu.family[i],c(";"))[[1]][5]
+}
+
+names(otu.genus) <- names(taxonomy)
+names(otu.family) <- names(taxonomy)
+
+print("top decile OTU genus")
+print(paste(otu.genus[match(rownames(h.metnash.aldex)[top],names(otu.genus))], collapse="\n"))
+# [1] "Phascolarctobacterium\nLactobacillus\nParaprevotella\nIncertae_Sedis\nIncertae_Sedis\nMarvinbryantia\nBifidobacterium\nunclassified\nunclassified\nRuminococcus\nButyricicoccus\nParaprevotella\nIncertae_Sedis\nIncertae_Sedis\nunclassified\nSubdoligranulum\nIncertae_Sedis\nunclassified\nunclassified\nunclassified\nLactobacillus\nPrevotella\nunclassified\nunclassified\nSubdoligranulum\nAlistipes\nIncertae_Sedis\nunclassified\nOlsenella\nFaecalibacterium\nAnaerostipes\nSutterella\nDialister\nRuminococcus\nDesulfovibrio\nIncertae_Sedis\nunclassified\nBlautia\nunclassified\nIncertae_Sedis\nBacteroides\nEnterorhabdus\nunclassified\nunclassified\nunclassified\nAcidaminococcus\nRoseburia\nIncertae_Sedis\nAlloprevotella\nSubdoligranulum\nunclassified\nunclassified\nunclassified"
+print("top decile OTU family")
+print(paste(otu.family[match(rownames(h.metnash.aldex)[top],names(otu.family))], collapse="\n"))
+# [1] "Acidaminococcaceae\nLactobacillaceae\nPrevotellaceae\nLachnospiraceae\nLachnospiraceae\nLachnospiraceae\nBifidobacteriaceae\nLachnospiraceae\nCoriobacteriaceae\nRuminococcaceae\nRuminococcaceae\nPrevotellaceae\nRuminococcaceae\nRuminococcaceae\nLachnospiraceae\nRuminococcaceae\nLachnospiraceae\nunclassified\nunclassified\nRuminococcaceae\nLactobacillaceae\nPrevotellaceae\nLachnospiraceae\nPrevotellaceae\nRuminococcaceae\nRikenellaceae\nRuminococcaceae\nunclassified\nCoriobacteriaceae\nRuminococcaceae\nLachnospiraceae\nAlcaligenaceae\nVeillonellaceae\nRuminococcaceae\nDesulfovibrionaceae\nFamily_XIII\nunclassified\nLachnospiraceae\nLachnospiraceae\nLachnospiraceae\nBacteroidaceae\nCoriobacteriaceae\nLachnospiraceae\nChristensenellaceae\nLachnospiraceae\nAcidaminococcaceae\nLachnospiraceae\nLachnospiraceae\nPrevotellaceae\nRuminococcaceae\nLachnospiraceae\nRuminococcaceae\nLachnospiraceae"
+
+print("bottom decile OTU genus")
+print(paste(otu.genus[match(rownames(h.metnash.aldex)[bottom],names(otu.genus))], collapse="\n"))
+# [1] "unclassified\nunclassified\nStreptococcus\nRoseburia\nunclassified\nunclassified\nOdoribacter\nOdoribacter\nBacteroides\nRoseburia\nIncertae_Sedis\nunclassified\nunclassified\nIncertae_Sedis\nBlautia\nAkkermansia\nunclassified\nAkkermansia\nunclassified\nIncertae_Sedis\nDorea\nRuminococcus\nunclassified\nunclassified\nTuricibacter\nIncertae_Sedis\nAlistipes\nDialister\nAlloprevotella\nunclassified\nPseudobutyrivibrio\nAnaerovorax\nBlautia\nunclassified\nBacteroides\nBacteroides\nBacteroides\nBacteroides\nAdlercreutzia\nFaecalibacterium\nunclassified\nIncertae_Sedis\nIncertae_Sedis\nRuminococcus\nBacteroides\nSubdoligranulum\nCoprococcus\nunclassified\nIncertae_Sedis\nunclassified\nSubdoligranulum\nDorea\nIncertae_Sedis"
+print("bottom decile OTU family")
+print(paste(otu.family[match(rownames(h.metnash.aldex)[bottom],names(otu.family))], collapse="\n"))
+# [1] "Christensenellaceae\nCoriobacteriaceae\nStreptococcaceae\nLachnospiraceae\nLachnospiraceae\nLachnospiraceae\nPorphyromonadaceae\nPorphyromonadaceae\nBacteroidaceae\nLachnospiraceae\nLachnospiraceae\nChristensenellaceae\nRuminococcaceae\nLachnospiraceae\nLachnospiraceae\nVerrucomicrobiaceae\nChristensenellaceae\nVerrucomicrobiaceae\nLachnospiraceae\nLachnospiraceae\nLachnospiraceae\nRuminococcaceae\nLachnospiraceae\nChristensenellaceae\nErysipelotrichaceae\nRuminococcaceae\nRikenellaceae\nVeillonellaceae\nPrevotellaceae\nRuminococcaceae\nLachnospiraceae\nFamily_XIII\nLachnospiraceae\nunclassified\nBacteroidaceae\nBacteroidaceae\nBacteroidaceae\nBacteroidaceae\nCoriobacteriaceae\nRuminococcaceae\nRuminococcaceae\nRuminococcaceae\nRuminococcaceae\nRuminococcaceae\nBacteroidaceae\nRuminococcaceae\nLachnospiraceae\nErysipelotrichaceae\nLachnospiraceae\nRuminococcaceae\nRuminococcaceae\nLachnospiraceae\nFamily_XIII"
+
 
 
 # BARPLOT
