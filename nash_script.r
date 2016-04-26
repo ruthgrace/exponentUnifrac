@@ -10,7 +10,7 @@ library(vegan)
 
 otu.tab <- read.table("data/nash_data/summed_data_baseline_only.txt", header=T, sep="\t", row.names=1, comment.char="", check.names=FALSE)
 
-taxonomy.table <- otu.tab <- read.table("data/nash_data/td_OTU_tag_mapped_lineage.txt", header=T, sep="\t", row.names=1, comment.char="", check.names=FALSE)
+taxonomy.table <- read.table("data/nash_data/td_OTU_tag_mapped_lineage.txt", header=T, sep="\t", row.names=1, comment.char="", check.names=FALSE)
 
 taxonomy <- taxonomy.table$taxonomy
 names(taxonomy) <- rownames(taxonomy.table)
@@ -179,27 +179,32 @@ h.ss.cond <- groups
 h.ss <- h.ss[,which(h.ss.cond == "Healthy SS" | h.ss.cond == "SS")]
 h.ss.cond <- h.ss.cond[which(h.ss.cond == "Healthy SS" | h.ss.cond == "SS")]
 
-h.ss.aldex <- aldex(data.frame(h.ss),as.character(h.ss.cond))
+h.ss.aldex <- aldex(data.frame(h.ss),as.character(h.ss.cond),mc.samples=128)
 aldex.plot(h.ss.aldex,type="MA",main="Bland-Altman style plot for healthy vs. SS",ylab="ratio",xlab="average")
 aldex.plot(h.ss.aldex,type="MW",main="Difference within vs. difference between for healthy vs. SS",xlab="Difference within",ylab="Difference between")
+write.table(h.ss.aldex,file="nash_output/H_vs_SS_aldex_output_128_MC_samples.txt",sep="\t",quote=FALSE)
 
 h.nash <- t(otu.tab)
 h.nash.cond <- groups
 h.nash <- h.nash[,which(h.nash.cond == "Healthy NASH" | h.nash.cond == "NASH")]
 h.nash.cond <- h.nash.cond[which(h.nash.cond == "Healthy NASH" | h.nash.cond == "NASH")]
 
-h.nash.aldex <- aldex(data.frame(h.nash),as.character(h.nash.cond))
+h.nash.aldex <- aldex(data.frame(h.nash),as.character(h.nash.cond),mc.samples=128)
 aldex.plot(h.nash.aldex,type="MA",main="Bland-Altman style plot for healthy vs. NASH",ylab="ratio",xlab="average")
 aldex.plot(h.nash.aldex,type="MW",main="Difference within vs difference between for healthy vs. NASH",xlab="Difference within",ylab="Difference between")
+write.table(h.nash.aldex,file="nash_output/H_vs_NASH_aldex_output_128_MC_samples.txt",sep="\t",quote=FALSE)
 
 h.metnash <- t(otu.tab)
 h.metnash.cond <- groups
 h.metnash <- h.metnash[,which(h.metnash.cond == "Healthy Metagenomic" | h.metnash.cond == "NASH Metagenomic")]
 h.metnash.cond <- h.metnash.cond[which(h.metnash.cond == "Healthy Metagenomic" | h.metnash.cond == "NASH Metagenomic")]
 
-h.metnash.aldex <- aldex(data.frame(h.metnash),as.character(h.metnash.cond))
+h.metnash.aldex <- aldex(data.frame(h.metnash),as.character(h.metnash.cond),mc.samples=128)
 aldex.plot(h.metnash.aldex,type="MA",main="Bland-Altman style plot for healthy vs. extreme NASH",ylab="ratio",xlab="average")
 aldex.plot(h.metnash.aldex,type="MW",main="Difference within vs difference between for healthy vs. extreme NASH",xlab="Difference within",ylab="Difference between")
+write.table(h.metnash.aldex,file="nash_output/H_vs_extreme_NASH_aldex_output_128_MC_samples.txt",sep="\t",quote=FALSE)
+
+write.table(taxonomy,file="nash_output/taxonomy_map.txt",sep="\t",quote=FALSE,col.names=FALSE)
 
 mycolor <- c(col2rgb("turquoise4"))
 red <- mycolor[1]
@@ -427,15 +432,21 @@ print(summary(h.metnash.aldex$effect[bottom] -  h.nash.aldex$effect[bottom]))
 
 otu.genus <- c(as.character(taxonomy))
 otu.family <- c(as.character(taxonomy))
+bootstrap <- c(as.character(taxonomy))
 
 for (i in c(1:length(taxonomy))) {
   otu.genus[i] <- strsplit(otu.genus[i],c(";"))[[1]][6]
 	otu.family[i] <- strsplit(otu.family[i],c(";"))[[1]][5]
+	bootstrap[i] <- strsplit(bootstrap[i],c(";"))[[1]][7]
 }
 
 names(otu.genus) <- names(taxonomy)
 names(otu.family) <- names(taxonomy)
+names(bootstrap) <- names(taxonomy)
 
+print("top decile bootstrap")
+print(paste(bootstrap[match(rownames(h.metnash.aldex)[top],names(bootstrap))], collapse="\n"))
+# [1] "|97\n|100\n|100\n|77\n|98\n|72\n|73\n|100\n|71\n|100\n|100\n|97\n|72\n|91\n|100\n|98\n|91\n|98\n|87\n|93\n|100\n|98\n|99\n|100\n|92\n|99\n|98\n|100\n|73\n|98\n|100\n|72\n|70\n|100\n|100\n|98\n|100\n|100\n|100\n|100\n|100\n|100\n|97\n|100\n|99\n|100\n|94\n|100\n|100\n|96\n|92\n|100\n|100"
 print("top decile OTU genus")
 print(paste(otu.genus[match(rownames(h.metnash.aldex)[top],names(otu.genus))], collapse="\n"))
 # [1] "Phascolarctobacterium\nLactobacillus\nParaprevotella\nIncertae_Sedis\nIncertae_Sedis\nMarvinbryantia\nBifidobacterium\nunclassified\nunclassified\nRuminococcus\nButyricicoccus\nParaprevotella\nIncertae_Sedis\nIncertae_Sedis\nunclassified\nSubdoligranulum\nIncertae_Sedis\nunclassified\nunclassified\nunclassified\nLactobacillus\nPrevotella\nunclassified\nunclassified\nSubdoligranulum\nAlistipes\nIncertae_Sedis\nunclassified\nOlsenella\nFaecalibacterium\nAnaerostipes\nSutterella\nDialister\nRuminococcus\nDesulfovibrio\nIncertae_Sedis\nunclassified\nBlautia\nunclassified\nIncertae_Sedis\nBacteroides\nEnterorhabdus\nunclassified\nunclassified\nunclassified\nAcidaminococcus\nRoseburia\nIncertae_Sedis\nAlloprevotella\nSubdoligranulum\nunclassified\nunclassified\nunclassified"
@@ -443,6 +454,9 @@ print("top decile OTU family")
 print(paste(otu.family[match(rownames(h.metnash.aldex)[top],names(otu.family))], collapse="\n"))
 # [1] "Acidaminococcaceae\nLactobacillaceae\nPrevotellaceae\nLachnospiraceae\nLachnospiraceae\nLachnospiraceae\nBifidobacteriaceae\nLachnospiraceae\nCoriobacteriaceae\nRuminococcaceae\nRuminococcaceae\nPrevotellaceae\nRuminococcaceae\nRuminococcaceae\nLachnospiraceae\nRuminococcaceae\nLachnospiraceae\nunclassified\nunclassified\nRuminococcaceae\nLactobacillaceae\nPrevotellaceae\nLachnospiraceae\nPrevotellaceae\nRuminococcaceae\nRikenellaceae\nRuminococcaceae\nunclassified\nCoriobacteriaceae\nRuminococcaceae\nLachnospiraceae\nAlcaligenaceae\nVeillonellaceae\nRuminococcaceae\nDesulfovibrionaceae\nFamily_XIII\nunclassified\nLachnospiraceae\nLachnospiraceae\nLachnospiraceae\nBacteroidaceae\nCoriobacteriaceae\nLachnospiraceae\nChristensenellaceae\nLachnospiraceae\nAcidaminococcaceae\nLachnospiraceae\nLachnospiraceae\nPrevotellaceae\nRuminococcaceae\nLachnospiraceae\nRuminococcaceae\nLachnospiraceae"
 
+print("bottom decile bootstrap")
+print(paste(bootstrap[match(rownames(h.metnash.aldex)[bottom],names(bootstrap))], collapse="\n"))
+# [1] "|100\n|100\n|100\n|100\n|100\n|100\n|100\n|73\n|100\n|100\n|91\n|100\n|98\n|83\n|100\n|100\n|100\n|85\n|93\n|100\n|98\n|100\n|84\n|99\n|100\n|82\n|91\n|100\n|76\n|100\n|85\n|100\n|98\n|100\n|100\n|100\n|100\n|85\n|100\n|100\n|100\n|97\n|100\n|100\n|99\n|91\n|74\n|100\n|85\n|85\n|100\n|100\n|91"
 print("bottom decile OTU genus")
 print(paste(otu.genus[match(rownames(h.metnash.aldex)[bottom],names(otu.genus))], collapse="\n"))
 # [1] "unclassified\nunclassified\nStreptococcus\nRoseburia\nunclassified\nunclassified\nOdoribacter\nOdoribacter\nBacteroides\nRoseburia\nIncertae_Sedis\nunclassified\nunclassified\nIncertae_Sedis\nBlautia\nAkkermansia\nunclassified\nAkkermansia\nunclassified\nIncertae_Sedis\nDorea\nRuminococcus\nunclassified\nunclassified\nTuricibacter\nIncertae_Sedis\nAlistipes\nDialister\nAlloprevotella\nunclassified\nPseudobutyrivibrio\nAnaerovorax\nBlautia\nunclassified\nBacteroides\nBacteroides\nBacteroides\nBacteroides\nAdlercreutzia\nFaecalibacterium\nunclassified\nIncertae_Sedis\nIncertae_Sedis\nRuminococcus\nBacteroides\nSubdoligranulum\nCoprococcus\nunclassified\nIncertae_Sedis\nunclassified\nSubdoligranulum\nDorea\nIncertae_Sedis"
@@ -451,7 +465,9 @@ print(paste(otu.family[match(rownames(h.metnash.aldex)[bottom],names(otu.family)
 # [1] "Christensenellaceae\nCoriobacteriaceae\nStreptococcaceae\nLachnospiraceae\nLachnospiraceae\nLachnospiraceae\nPorphyromonadaceae\nPorphyromonadaceae\nBacteroidaceae\nLachnospiraceae\nLachnospiraceae\nChristensenellaceae\nRuminococcaceae\nLachnospiraceae\nLachnospiraceae\nVerrucomicrobiaceae\nChristensenellaceae\nVerrucomicrobiaceae\nLachnospiraceae\nLachnospiraceae\nLachnospiraceae\nRuminococcaceae\nLachnospiraceae\nChristensenellaceae\nErysipelotrichaceae\nRuminococcaceae\nRikenellaceae\nVeillonellaceae\nPrevotellaceae\nRuminococcaceae\nLachnospiraceae\nFamily_XIII\nLachnospiraceae\nunclassified\nBacteroidaceae\nBacteroidaceae\nBacteroidaceae\nBacteroidaceae\nCoriobacteriaceae\nRuminococcaceae\nRuminococcaceae\nRuminococcaceae\nRuminococcaceae\nRuminococcaceae\nBacteroidaceae\nRuminococcaceae\nLachnospiraceae\nErysipelotrichaceae\nLachnospiraceae\nRuminococcaceae\nRuminococcaceae\nLachnospiraceae\nFamily_XIII"
 
 
+# GENUS LEVEL
 
-# BARPLOT
 
-# ALDEX BY GENUS TO COMPARE WITH QPCR
+# FAMILY LEVEL
+
+
