@@ -182,7 +182,7 @@ h.ss.cond <- h.ss.cond[which(h.ss.cond == "Healthy SS" | h.ss.cond == "SS")]
 h.ss.aldex <- aldex(data.frame(h.ss),as.character(h.ss.cond),mc.samples=128)
 aldex.plot(h.ss.aldex,type="MA",main="Bland-Altman style plot for healthy vs. SS",ylab="ratio",xlab="average")
 aldex.plot(h.ss.aldex,type="MW",main="Difference within vs. difference between for healthy vs. SS",xlab="Difference within",ylab="Difference between")
-write.table(h.ss.aldex,file="nash_output/H_vs_SS_aldex_output_128_MC_samples.txt",sep="\t",quote=FALSE)
+write.table(h.ss.aldex,file="nash_output/H_vs_SS_aldex_output_OTU_level_128_MC_samples.txt",sep="\t",quote=FALSE)
 
 h.nash <- t(otu.tab)
 h.nash.cond <- groups
@@ -192,7 +192,7 @@ h.nash.cond <- h.nash.cond[which(h.nash.cond == "Healthy NASH" | h.nash.cond == 
 h.nash.aldex <- aldex(data.frame(h.nash),as.character(h.nash.cond),mc.samples=128)
 aldex.plot(h.nash.aldex,type="MA",main="Bland-Altman style plot for healthy vs. NASH",ylab="ratio",xlab="average")
 aldex.plot(h.nash.aldex,type="MW",main="Difference within vs difference between for healthy vs. NASH",xlab="Difference within",ylab="Difference between")
-write.table(h.nash.aldex,file="nash_output/H_vs_NASH_aldex_output_128_MC_samples.txt",sep="\t",quote=FALSE)
+write.table(h.nash.aldex,file="nash_output/H_vs_NASH_aldex_output_OTU_level_128_MC_samples.txt",sep="\t",quote=FALSE)
 
 h.metnash <- t(otu.tab)
 h.metnash.cond <- groups
@@ -202,7 +202,7 @@ h.metnash.cond <- h.metnash.cond[which(h.metnash.cond == "Healthy Metagenomic" |
 h.metnash.aldex <- aldex(data.frame(h.metnash),as.character(h.metnash.cond),mc.samples=128)
 aldex.plot(h.metnash.aldex,type="MA",main="Bland-Altman style plot for healthy vs. extreme NASH",ylab="ratio",xlab="average")
 aldex.plot(h.metnash.aldex,type="MW",main="Difference within vs difference between for healthy vs. extreme NASH",xlab="Difference within",ylab="Difference between")
-write.table(h.metnash.aldex,file="nash_output/H_vs_extreme_NASH_aldex_output_128_MC_samples.txt",sep="\t",quote=FALSE)
+write.table(h.metnash.aldex,file="nash_output/H_vs_extreme_NASH_aldex_output_OTU_level_128_MC_samples.txt",sep="\t",quote=FALSE)
 
 write.table(taxonomy,file="nash_output/taxonomy_map.txt",sep="\t",quote=FALSE,col.names=FALSE)
 
@@ -467,7 +467,119 @@ print(paste(otu.family[match(rownames(h.metnash.aldex)[bottom],names(otu.family)
 
 # GENUS LEVEL
 
+otu.genus <- c(as.character(taxonomy))
+
+for (i in c(1:length(taxonomy))) {
+  otu.genus[i] <- strsplit(otu.genus[i],c(";"))[[1]][6]
+}
+
+otu.tab.genus <- aggregate(t(otu.tab),list(otu.genus),sum)
+rownames(otu.tab.genus) <- otu.tab.genus$Group.1
+otu.tab.genus <- otu.tab.genus[,c(2:ncol(otu.tab.genus))]
+
+
+
+
+
+
+
+
+
+
+
+pdf("nash_output/ALDEx_genus_level_plots.pdf")
+
+h.ss.genus <- otu.tab.genus
+h.ss.genus.cond <- groups
+h.ss.genus <- h.ss.genus[,which(h.ss.genus.cond == "Healthy SS" | h.ss.genus.cond == "SS")]
+h.ss.genus.cond <- h.ss.genus.cond[which(h.ss.genus.cond == "Healthy SS" | h.ss.genus.cond == "SS")]
+
+h.ss.genus.aldex <- aldex(data.frame(h.ss.genus),as.character(h.ss.genus.cond),mc.samples=128)
+aldex.plot(h.ss.genus.aldex,type="MA",main="Bland-Altman style plot for healthy vs. SS",ylab="ratio",xlab="average")
+aldex.plot(h.ss.genus.aldex,type="MW",main="Difference within vs. difference between for healthy vs. SS",xlab="Difference within",ylab="Difference between")
+write.table(h.ss.genus.aldex,file="nash_output/H_vs_SS_aldex_output_genus_level_128_MC_samples.txt",sep="\t",quote=FALSE)
+
+h.nash.genus <- otu.tab.genus
+h.nash.genus.cond <- groups
+h.nash.genus <- h.nash.genus[,which(h.nash.genus.cond == "Healthy NASH" | h.nash.genus.cond == "NASH")]
+h.nash.genus.cond <- h.nash.genus.cond[which(h.nash.genus.cond == "Healthy NASH" | h.nash.genus.cond == "NASH")]
+
+h.nash.genus.aldex <- aldex(data.frame(h.nash.genus),as.character(h.nash.genus.cond),mc.samples=128)
+aldex.plot(h.nash.genus.aldex,type="MA",main="Bland-Altman style plot for healthy vs. NASH",ylab="ratio",xlab="average")
+aldex.plot(h.nash.genus.aldex,type="MW",main="Difference within vs difference between for healthy vs. NASH",xlab="Difference within",ylab="Difference between")
+write.table(h.nash.genus.aldex,file="nash_output/H_vs_NASH_aldex_output_genus_level_128_MC_samples.txt",sep="\t",quote=FALSE)
+
+h.metnash.genus <- otu.tab.genus
+h.metnash.genus.cond <- groups
+h.metnash.genus <- h.metnash.genus[,which(h.metnash.genus.cond == "Healthy Metagenomic" | h.metnash.genus.cond == "NASH Metagenomic")]
+h.metnash.genus.cond <- h.metnash.genus.cond[which(h.metnash.genus.cond == "Healthy Metagenomic" | h.metnash.genus.cond == "NASH Metagenomic")]
+
+h.metnash.genus.aldex <- aldex(data.frame(h.metnash.genus),as.character(h.metnash.genus.cond),mc.samples=128)
+aldex.plot(h.metnash.genus.aldex,type="MA",main="Bland-Altman style plot for healthy vs. extreme NASH",ylab="ratio",xlab="average")
+aldex.plot(h.metnash.genus.aldex,type="MW",main="Difference within vs difference between for healthy vs. extreme NASH",xlab="Difference within",ylab="Difference between")
+write.table(h.metnash.genus.aldex,file="nash_output/H_vs_extreme_NASH_aldex_output_genus_level_128_MC_samples.txt",sep="\t",quote=FALSE)
+
+dev.off()
+
+
+
+
+
+
+
+
+
+
+
+
 
 # FAMILY LEVEL
 
+otu.family <- c(as.character(taxonomy))
 
+for (i in c(1:length(taxonomy))) {
+  otu.family[i] <- strsplit(otu.family[i],c(";"))[[1]][5]
+}
+
+otu.tab.family <- aggregate(t(otu.tab),list(otu.family),sum)
+rownames(otu.tab.family) <- otu.tab.family$Group.1
+otu.tab.family <- otu.tab.family[,c(2:ncol(otu.tab.family))]
+
+pdf("nash_output/ALDEx_genus_level_plots.pdf")
+
+h.ss.family <- otu.tab.family
+h.ss.family.cond <- groups
+h.ss.family <- h.ss.family[,which(h.ss.family.cond == "Healthy SS" | h.ss.family.cond == "SS")]
+h.ss.family.cond <- h.ss.family.cond[which(h.ss.family.cond == "Healthy SS" | h.ss.family.cond == "SS")]
+
+h.ss.family.aldex <- aldex(data.frame(h.ss.family),as.character(h.ss.family.cond),mc.samples=128)
+aldex.plot(h.ss.family.aldex,type="MA",main="Bland-Altman style plot for healthy vs. SS",ylab="ratio",xlab="average")
+aldex.plot(h.ss.family.aldex,type="MW",main="Difference within vs. difference between for healthy vs. SS",xlab="Difference within",ylab="Difference between")
+write.table(h.ss.family.aldex,file="nash_output/H_vs_SS_aldex_output_family_level_128_MC_samples.txt",sep="\t",quote=FALSE)
+
+h.nash.family <- otu.tab.family
+h.nash.family.cond <- groups
+h.nash.family <- h.nash.family[,which(h.nash.family.cond == "Healthy NASH" | h.nash.family.cond == "NASH")]
+h.nash.family.cond <- h.nash.family.cond[which(h.nash.family.cond == "Healthy NASH" | h.nash.family.cond == "NASH")]
+
+h.nash.family.aldex <- aldex(data.frame(h.nash.family),as.character(h.nash.family.cond),mc.samples=128)
+aldex.plot(h.nash.family.aldex,type="MA",main="Bland-Altman style plot for healthy vs. NASH",ylab="ratio",xlab="average")
+aldex.plot(h.nash.family.aldex,type="MW",main="Difference within vs difference between for healthy vs. NASH",xlab="Difference within",ylab="Difference between")
+write.table(h.nash.family.aldex,file="nash_output/H_vs_NASH_aldex_output_family_level_128_MC_samples.txt",sep="\t",quote=FALSE)
+
+h.metnash.family <- otu.tab.family
+h.metnash.family.cond <- groups
+h.metnash.family <- h.metnash.family[,which(h.metnash.family.cond == "Healthy Metagenomic" | h.metnash.family.cond == "NASH Metagenomic")]
+h.metnash.family.cond <- h.metnash.family.cond[which(h.metnash.family.cond == "Healthy Metagenomic" | h.metnash.family.cond == "NASH Metagenomic")]
+
+h.metnash.family.aldex <- aldex(data.frame(h.metnash.family),as.character(h.metnash.family.cond),mc.samples=128)
+aldex.plot(h.metnash.family.aldex,type="MA",main="Bland-Altman style plot for healthy vs. extreme NASH",ylab="ratio",xlab="average")
+aldex.plot(h.metnash.family.aldex,type="MW",main="Difference within vs difference between for healthy vs. extreme NASH",xlab="Difference within",ylab="Difference between")
+write.table(h.metnash.family.aldex,file="nash_output/H_vs_extreme_NASH_aldex_output_family_level_128_MC_samples.txt",sep="\t",quote=FALSE)
+
+dev.off()
+
+#output sample groupings
+
+names(groups) <- rownames(otu.tab)
+write.table(groups,file="nash_output/sample_grouping.txt",sep="\t",quote=FALSE,col.names=FALSE)

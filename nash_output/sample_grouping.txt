@@ -1,0 +1,67 @@
+CL-148-BL	NASH
+HLD-53	Healthy NASH
+CL-119	NASH Metagenomic
+CL-127-BL-2	NASH
+HLD-112	Healthy Metagenomic
+HLD-85	Healthy Metagenomic
+HLD-39-2	Healthy SS
+HLD-50-2	SS
+HLD-64	Healthy SS
+HLD-111-2	Healthy Metagenomic
+CL-141-BL-R2	NASH Metagenomic
+HLD-34	Healthy SS
+CL-128	NASH
+HLD-100	Healthy Metagenomic
+HLD-22-2	Healthy NASH
+HLD-104	Healthy NASH
+CL-176-BL-R3	SS
+CL-151-BL-R2	NASH
+HLD-25	Healthy NASH
+CL-165	NASH Metagenomic
+HLD-23	Healthy Metagenomic
+HLD-24	Healthy NASH
+HLD-72-2	Healthy Metagenomic
+HLD-43	Healthy NASH
+CL-147	NASH
+CL-118	NASH
+HLD-51	Healthy SS
+CL-134	SS
+HLD-103-2	Healthy NASH
+CL-139-BL-2	NASH
+CL-154-BL	NASH
+HLD-77	Healthy SS
+HLD-35	Healthy SS
+HLD-87	Healthy NASH
+CL-137	NASH
+HLD-94	Healthy NASH
+CL-142-2	SS
+HLD-31	Healthy SS
+HLD-102	Healthy Metagenomic
+HLD-99	SS
+CL-167	NASH
+HLD-74	Healthy SS
+HLD-96-2	Healthy SS
+CL-173-2	NASH Metagenomic
+CL-117	SS
+HLD-80	Healthy Metagenomic
+HLD-28	Healthy Metagenomic
+CL-152-BL	NASH
+CL-146-BL	NASH
+CL-130	SS
+CL-160	NASH Metagenomic
+CL-177	NASH Metagenomic
+CL-170	SS
+HLD-47	Healthy Metagenomic
+HLD-38	SS
+CL-171-BL	NASH
+CL-166-BL	NASH Metagenomic
+CL-136	SS
+HLD-45	SS
+CL-169-BL	NASH Metagenomic
+CL-131	SS
+CL-175	SS
+CL-150	SS
+CL-161-2	SS
+CL-144-2	NASH Metagenomic
+CL-116	NASH
+CL-172	NASH
