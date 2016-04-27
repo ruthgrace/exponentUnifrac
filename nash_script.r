@@ -228,7 +228,7 @@ h.nafld.aldex <- aldex(data.frame(h.nafld),as.character(h.nafld.cond),mc.samples
 aldex.plot(h.nafld.aldex,type="MA",ylab="ratio",xlab="average")
 title(main="Bland-Altman style plot for healthy vs. NAFLD")
 aldex.plot(h.nafld.aldex,type="MW",xlab="Difference within",ylab="Difference between")
-title(main="Difference within vs difference between for healthy vs. all NAFLD")
+title(main="Difference within vs difference between for healthy vs. NAFLD")
 write.table(h.nafld.aldex,file="nash_output/H_vs_NAFLD_aldex_output_OTU_level_128_MC_samples.txt",sep="\t",quote=FALSE)
 
 
@@ -553,10 +553,10 @@ title(main="Difference within vs difference between for healthy vs. extreme NASH
 write.table(h.metnash.genus.aldex,file="nash_output/H_vs_extreme_NASH_aldex_output_genus_level_128_MC_samples.txt",sep="\t",quote=FALSE)
 
 h.nafld.genus <- otu.tab.genus
-h.nafld.cond <- as.character(groups)
-h.nafld.cond <- str_extract(h.nafld.cond, "^[^ ]+")
-h.nafld.cond[which(h.nafld.cond == "NASH")] <- "NAFLD"
-h.nafld.cond[which(h.nafld.cond == "SS")] <- "NAFLD"
+h.nafld.genus.cond <- as.character(groups)
+h.nafld.genus.cond <- str_extract(h.nafld.genus.cond, "^[^ ]+")
+h.nafld.genus.cond[which(h.nafld.genus.cond == "NASH")] <- "NAFLD"
+h.nafld.genus.cond[which(h.nafld.genus.cond == "SS")] <- "NAFLD"
 
 h.nafld.genus.aldex <- aldex(data.frame(h.nafld.genus),as.character(h.nafld.genus.cond),mc.samples=128)
 aldex.plot(h.nafld.genus.aldex,type="MA",ylab="ratio",xlab="average")
@@ -625,10 +625,10 @@ title(main="Difference within vs difference between for healthy vs. extreme NASH
 write.table(h.metnash.family.aldex,file="nash_output/H_vs_extreme_NASH_aldex_output_family_level_128_MC_samples.txt",sep="\t",quote=FALSE)
 
 h.nafld.family <- otu.tab.family
-h.nafld.cond <- as.character(groups)
-h.nafld.cond <- str_extract(h.nafld.cond, "^[^ ]+")
-h.nafld.cond[which(h.nafld.cond == "NASH")] <- "NAFLD"
-h.nafld.cond[which(h.nafld.cond == "SS")] <- "NAFLD"
+h.nafld.family.cond <- as.character(groups)
+h.nafld.family.cond <- str_extract(h.nafld.family.cond, "^[^ ]+")
+h.nafld.family.cond[which(h.nafld.family.cond == "NASH")] <- "NAFLD"
+h.nafld.family.cond[which(h.nafld.family.cond == "SS")] <- "NAFLD"
 
 h.nafld.family.aldex <- aldex(data.frame(h.nafld.family),as.character(h.nafld.family.cond),mc.samples=128)
 aldex.plot(h.nafld.family.aldex,type="MA",ylab="ratio",xlab="average")
