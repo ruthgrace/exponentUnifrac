@@ -1,0 +1,2 @@
+OTU family	OTU genus	SILVA bootstrap value	H vs. SS effect	H vs. NASH effect	H vs. extreme NASH effect
+Lactobacillaceae	Lactobacillus	97	$0.479$	$0.591$	$0.898$

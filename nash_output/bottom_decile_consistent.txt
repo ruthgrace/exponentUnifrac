@@ -1,0 +1,6 @@
+OTU family	OTU genus	SILVA bootstrap value	H vs. SS effect	H vs. NASH effect	H vs. extreme NASH effect
+Lachnospiraceae	Blautia	85	$-0.413$	$-0.415$	$-0.519$
+Bacteroidaceae	Bacteroides	100	$-0.657$	$-0.524$	$-0.526$
+Ruminococcaceae	Faecalibacterium	100	$-0.593$	$-0.402$	$-0.549$
+Lachnospiraceae	Incertae_Sedis	85	$-0.523$	$-0.404$	$-0.682$
+Lachnospiraceae	Dorea	100	$-0.628$	$-0.455$	$-0.731$
