@@ -109,3 +109,35 @@ points(metnash$diff.win[match(rownames(top.consistent),rownames(metnash))],metna
 points(metnash$diff.win[match(rownames(bottom.consistent),rownames(metnash))],metnash$diff.btw[match(rownames(bottom.consistent),rownames(metnash))],pch=1,col="black")
 
 dev.off()
+
+print('Effect difference of Healthy vs. NASH - Healthy vs. SS, top decile')
+print(summary(nash$effect[match(rownames(top),rownames(nash))] - ss$effect[match(rownames(top),rownames(ss))]))
+# Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
+# -0.52920 -0.07694  0.06181  0.05022  0.15290  0.55070 
+
+print('Effect difference of Healthy vs. extreme NASH - Healthy vs. SS, top decile')
+print(summary(metnash$effect[match(rownames(top),rownames(metnash))] - ss$effect[match(rownames(top),rownames(ss))]))
+# Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+# -0.3549  0.2148  0.3315  0.3275  0.3928  1.2710 
+
+print('Effect difference of Healthy vs. extreme NASH - Healthy vs. NASH, top decile')
+print(summary(metnash$effect[match(rownames(top),rownames(metnash))] - nash$effect[match(rownames(top),rownames(nash))]))
+# Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
+# -0.03336  0.17040  0.27570  0.27720  0.34010  0.90980 
+
+print('Effect difference of Healthy vs. NASH - Healthy vs. SS, bottom decile')
+print(summary(nash$effect[match(rownames(bottom),rownames(nash))] - ss$effect[match(rownames(bottom),rownames(ss))]))
+# Min.   1st Qu.    Median      Mean   3rd Qu.      Max. 
+# -0.437300 -0.121400 -0.009667 -0.022350  0.096410  0.270900 
+
+print('Effect difference of Healthy vs. extreme NASH - Healthy vs. SS, bottom decile')
+print(summary(metnash$effect[match(rownames(bottom),rownames(metnash))] - ss$effect[match(rownames(bottom),rownames(ss))]))
+#    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+# -0.7422 -0.4118 -0.3029 -0.2773 -0.1125  0.1445 
+
+print('Effect difference of Healthy vs. extreme NASH - Healthy vs. NASH, bottom decile')
+print(summary(metnash$effect[match(rownames(bottom),rownames(metnash))] - nash$effect[match(rownames(bottom),rownames(nash))]))
+# Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
+# -0.63290 -0.33420 -0.25060 -0.25500 -0.14610  0.09599 
+
+
