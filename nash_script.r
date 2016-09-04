@@ -47,34 +47,6 @@ metagenomic_samples <- c("CL-119", "CL-139", "CL-141", "CL-144", "CL-160", "CL-1
 ## sanity check to make sure all your counts have metadata
 # which(!(colnames(otu.tab) %in% rownames(metadata)))
 
-# create otu.tab for genus level and family level analysis, before filtering
-
-otu.tab <- t(otu.tab)
-
-# genus
-otu.genus <- c(as.character(taxonomy))
-
-for (i in c(1:length(taxonomy))) {
-  otu.genus[i] <- strsplit(otu.genus[i],c(";"))[[1]][6]
-}
-
-otu.tab.genus <- aggregate(t(otu.tab),list(otu.genus),sum)
-rownames(otu.tab.genus) <- otu.tab.genus$Group.1
-otu.tab.genus <- otu.tab.genus[,c(2:ncol(otu.tab.genus))]
-
-# family
-otu.family <- c(as.character(taxonomy))
-
-for (i in c(1:length(taxonomy))) {
-  otu.family[i] <- strsplit(otu.family[i],c(";"))[[1]][5]
-}
-
-otu.tab.family <- aggregate(t(otu.tab),list(otu.family),sum)
-rownames(otu.tab.family) <- otu.tab.family$Group.1
-otu.tab.family <- otu.tab.family[,c(2:ncol(otu.tab.family))]
-
-otu.tab <- t(otu.tab)
-
 # remove OTUs that don't have at least 1% abundance in at least 1 sample
 sample.sum <- apply(otu.tab,2,sum)
 otu.filter <- apply(otu.tab,1,function(x) { return(length(which(x >= (sample.sum*0.01)))) } )
@@ -158,13 +130,21 @@ groups[which(groups == 2)] <- "SS"
 groups[which(groups == 3)] <- "NASH"
 groups[which(groups == 4)] <- "NASH Metagenomic"
 
+# healthyindexes <- which(groups == "Healthy")
+# halfhealthy <- length(healthyindexes)/2
+# healthyindexes <- sample(healthyindexes)
+# groups[healthyindexes[1:halfhealthy]] <- "Healthy SS"
+# groups[healthyindexes[(halfhealthy + 1):length(healthyindexes)]] <- "Healthy NASH"
+
 groups <- as.factor(groups)
 
 originalpalette <- palette()
 
 palette(c("blue", "blue4", "red", "red4", "purple"))
+# palette(c("blue", "red", "purple"))
 
 pdf("nash_output/pcoa_plots.pdf",height=7,width=9)
+# pdf("nash_output/pcoa_plots_Healthy_SS_NASH.pdf",height=7,width=9)
 
 originalpar <- par()
 par(mar=c(5.1, 5.1, 5.1, 14.1),xpd=TRUE)
@@ -197,7 +177,7 @@ library(ALDEx2)
 
 pdf("nash_output/ALDEx_effect_size_plots.pdf")
 
-# randomly pick which healthy sample will be controls for the SS or the NASH comparison
+# # randomly pick which healthy sample will be controls for the SS or the NASH comparison
 # healthy.index <- which(groups == "Healthy")
 # control.size <- floor(length(healthy.index)/2)
 # healthy.ss <- sample(healthy.index,control.size)
@@ -227,8 +207,8 @@ h.nash <- t(otu.tab)
 h.nash.cond <- as.character(groups)
 # h.nash <- h.nash[,which(h.nash.cond == "Healthy NASH" | h.nash.cond == "NASH")]
 # h.nash.cond <- h.nash.cond[which(h.nash.cond == "Healthy NASH" | h.nash.cond == "NASH")]
-h.nash <- h.nash[,which(h.nash.cond == "Healthy" | h.nash.cond == "Healthy Metagenomic" | h.nash.cond == "NASH" | h.nash.cond == "NASH Metagenomic")]
-h.nash.cond <- h.nash.cond[which(h.nash.cond == "Healthy" | h.nash.cond == "Healthy Metagenomic" | h.nash.cond == "NASH" | h.nash.cond == "NASH Metagenomic")]
+h.nash <- h.nash[,which(h.nash.cond == "Healthy" | h.nash.cond == "Healthy Metagenomic" | h.nash.cond == "NASH")]
+h.nash.cond <- h.nash.cond[which(h.nash.cond == "Healthy" | h.nash.cond == "Healthy Metagenomic" | h.nash.cond == "NASH")]
 h.nash.cond <- str_extract(h.nash.cond, "^[^ ]+")
 
 h.nash.aldex <- aldex(data.frame(h.nash),as.character(h.nash.cond),mc.samples=128)
@@ -295,10 +275,12 @@ cor(h.ss.aldex$effect, y = h.nash.aldex$effect, use = "everything", method = "sp
 plot(h.ss.aldex$effect, h.metnash.aldex$effect, pch=19,col=mycolor, main="Effect sizes of healthy vs SS compared to healthy vs extreme NASH",xlab="Healthy vs. SS",ylab="Healthy vs. extreme NASH")
 cor(h.ss.aldex$effect, y = h.metnash.aldex$effect, use = "everything", method = "spearman")
 # [1] 0.4517627
+# [1] 0.19397 FOR COMPARISON WITH NON OVERLAPPING HEALTHY SUBSET
 
 plot(h.nash.aldex$effect, h.metnash.aldex$effect, pch=19,col=mycolor, main="Effect sizes of healthy vs NASH compared to healthy vs extreme NASH",xlab="Healthy vs. NASH",ylab="Healthy vs. extreme NASH")
 cor(h.nash.aldex$effect, y = h.metnash.aldex$effect, use = "everything", method = "spearman")
 # [1] 0.6735478
+# [1] 0.1825742 FOR COMPARISON WITH NON OVERLAPPING HEALTHY SUBSET
 
 # make plots with top and bottom decile effect sizes from metnash comparison colored
 orchid <- c(col2rgb("darkorchid3"))
@@ -476,7 +458,17 @@ print(paste(otu.family[match(rownames(h.metnash.aldex)[bottom],names(otu.family)
 
 # GENUS LEVEL
 
-pdf("nash_output/ALDEx_genus_level_plots_unfiltered.pdf")
+otu.genus <- c(as.character(taxonomy))
+
+for (i in c(1:length(taxonomy))) {
+  otu.genus[i] <- strsplit(otu.genus[i],c(";"))[[1]][6]
+}
+
+otu.tab.genus <- aggregate(t(otu.tab),list(otu.genus),sum)
+rownames(otu.tab.genus) <- otu.tab.genus$Group.1
+otu.tab.genus <- otu.tab.genus[,c(2:ncol(otu.tab.genus))]
+
+pdf("nash_output/ALDEx_genus_level_plots.pdf")
 
 h.ss.genus <- otu.tab.genus
 h.ss.genus.cond <- groups
@@ -491,7 +483,7 @@ aldex.plot(h.ss.genus.aldex,type="MA",ylab="ratio",xlab="average")
 title(main="Bland-Altman style plot for healthy vs. SS")
 aldex.plot(h.ss.genus.aldex,type="MW",xlab="Difference within",ylab="Difference between")
 title(main="Difference within vs. difference between for healthy vs. SS")
-write.table(h.ss.genus.aldex,file="nash_output/H_vs_SS_aldex_output_genus_level_128_MC_samples_unfiltered.txt",sep="\t",quote=FALSE)
+write.table(h.ss.genus.aldex,file="nash_output/H_vs_SS_aldex_output_genus_level_128_MC_samples.txt",sep="\t",quote=FALSE)
 
 h.nash.genus <- otu.tab.genus
 h.nash.genus.cond <- groups
@@ -506,7 +498,7 @@ aldex.plot(h.nash.genus.aldex,type="MA",ylab="ratio",xlab="average")
 title(main="Bland-Altman style plot for healthy vs. NASH")
 aldex.plot(h.nash.genus.aldex,type="MW",xlab="Difference within",ylab="Difference between")
 title(main="Difference within vs difference between for healthy vs. NASH")
-write.table(h.nash.genus.aldex,file="nash_output/H_vs_NASH_aldex_output_genus_level_128_MC_samples_unfiltered.txt",sep="\t",quote=FALSE)
+write.table(h.nash.genus.aldex,file="nash_output/H_vs_NASH_aldex_output_genus_level_128_MC_samples.txt",sep="\t",quote=FALSE)
 
 h.metnash.genus <- otu.tab.genus
 h.metnash.genus.cond <- groups
@@ -518,7 +510,7 @@ aldex.plot(h.metnash.genus.aldex,type="MA",ylab="ratio",xlab="average")
 title(main="Bland-Altman style plot for healthy vs. extreme NASH")
 aldex.plot(h.metnash.genus.aldex,type="MW",xlab="Difference within",ylab="Difference between")
 title(main="Difference within vs difference between for healthy vs. extreme NASH")
-write.table(h.metnash.genus.aldex,file="nash_output/H_vs_extreme_NASH_aldex_output_genus_level_128_MC_samples_unfiltered.txt",sep="\t",quote=FALSE)
+write.table(h.metnash.genus.aldex,file="nash_output/H_vs_extreme_NASH_aldex_output_genus_level_128_MC_samples.txt",sep="\t",quote=FALSE)
 
 h.nafld.genus <- otu.tab.genus
 h.nafld.genus.cond <- as.character(groups)
@@ -531,14 +523,24 @@ aldex.plot(h.nafld.genus.aldex,type="MA",ylab="ratio",xlab="average")
 title(main="Bland-Altman style plot for healthy vs. NAFLD")
 aldex.plot(h.nafld.genus.aldex,type="MW",xlab="Difference within",ylab="Difference between")
 title(main="Difference within vs difference between for healthy vs. NAFLD")
-write.table(h.nafld.genus.aldex,file="nash_output/H_vs_NAFLD_aldex_output_genus_level_128_MC_samples_unfiltered.txt",sep="\t",quote=FALSE)
+write.table(h.nafld.genus.aldex,file="nash_output/H_vs_NAFLD_aldex_output_genus_level_128_MC_samples.txt",sep="\t",quote=FALSE)
 
 
 dev.off()
 
 # FAMILY LEVEL
 
-pdf("nash_output/ALDEx_family_level_plots_unfiltered.pdf")
+otu.family <- c(as.character(taxonomy))
+
+for (i in c(1:length(taxonomy))) {
+  otu.family[i] <- strsplit(otu.family[i],c(";"))[[1]][5]
+}
+
+otu.tab.family <- aggregate(t(otu.tab),list(otu.family),sum)
+rownames(otu.tab.family) <- otu.tab.family$Group.1
+otu.tab.family <- otu.tab.family[,c(2:ncol(otu.tab.family))]
+
+pdf("nash_output/ALDEx_family_level_plots.pdf")
 
 h.ss.family <- otu.tab.family
 h.ss.family.cond <- groups
@@ -553,7 +555,7 @@ aldex.plot(h.ss.family.aldex,type="MA",ylab="ratio",xlab="average")
 title(main="Bland-Altman style plot for healthy vs. SS")
 aldex.plot(h.ss.family.aldex,type="MW",xlab="Difference within",ylab="Difference between")
 title(main="Difference within vs. difference between for healthy vs. SS")
-write.table(h.ss.family.aldex,file="nash_output/H_vs_SS_aldex_output_family_level_128_MC_samples_unfiltered.txt",sep="\t",quote=FALSE)
+write.table(h.ss.family.aldex,file="nash_output/H_vs_SS_aldex_output_family_level_128_MC_samples.txt",sep="\t",quote=FALSE)
 
 h.nash.family <- otu.tab.family
 h.nash.family.cond <- groups
@@ -568,7 +570,7 @@ aldex.plot(h.nash.family.aldex,type="MA",ylab="ratio",xlab="average")
 title(main="Bland-Altman style plot for healthy vs. NASH")
 aldex.plot(h.nash.family.aldex,type="MW",xlab="Difference within",ylab="Difference between")
 title(main="Difference within vs difference between for healthy vs. NASH")
-write.table(h.nash.family.aldex,file="nash_output/H_vs_NASH_aldex_output_family_level_128_MC_samples_unfiltered.txt",sep="\t",quote=FALSE)
+write.table(h.nash.family.aldex,file="nash_output/H_vs_NASH_aldex_output_family_level_128_MC_samples.txt",sep="\t",quote=FALSE)
 
 h.metnash.family <- otu.tab.family
 h.metnash.family.cond <- groups
@@ -580,7 +582,7 @@ aldex.plot(h.metnash.family.aldex,type="MA",ylab="ratio",xlab="average")
 title(main="Bland-Altman style plot for healthy vs. extreme NASH")
 aldex.plot(h.metnash.family.aldex,type="MW",xlab="Difference within",ylab="Difference between")
 title(main="Difference within vs difference between for healthy vs. extreme NASH")
-write.table(h.metnash.family.aldex,file="nash_output/H_vs_extreme_NASH_aldex_output_family_level_128_MC_samples_unfiltered.txt",sep="\t",quote=FALSE)
+write.table(h.metnash.family.aldex,file="nash_output/H_vs_extreme_NASH_aldex_output_family_level_128_MC_samples.txt",sep="\t",quote=FALSE)
 
 h.nafld.family <- otu.tab.family
 h.nafld.family.cond <- as.character(groups)
@@ -593,7 +595,7 @@ aldex.plot(h.nafld.family.aldex,type="MA",ylab="ratio",xlab="average")
 title(main="Bland-Altman style plot for healthy vs. NAFLD")
 aldex.plot(h.nafld.family.aldex,type="MW",xlab="Difference within",ylab="Difference between")
 title(main="Difference within vs difference between for healthy vs. NAFLD")
-write.table(h.nafld.family.aldex,file="nash_output/H_vs_NAFLD_aldex_output_family_level_128_MC_samples_unfiltered.txt",sep="\t",quote=FALSE)
+write.table(h.nafld.family.aldex,file="nash_output/H_vs_NAFLD_aldex_output_family_level_128_MC_samples.txt",sep="\t",quote=FALSE)
 
 
 dev.off()
